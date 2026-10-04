@@ -32,6 +32,7 @@ export function buildNav(categories: Category[], photoAlbums: { slug: string; ti
       children: [
         { label: 'Essays', to: '/blogs', children: categories.filter((c) => !c.parent_id).map(toItem) },
         { label: 'Questions', to: '/questions' },
+        { label: 'Read by tag', to: '/tags' },
       ],
     },
     {
