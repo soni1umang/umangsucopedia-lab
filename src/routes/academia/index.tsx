@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, BookOpen, ExternalLink, GraduationCap, Sparkles, Linkedin } from 'lucide-react'
+import { ArrowRight, BookOpen, ExternalLink, GraduationCap, Sparkles } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { academia, publications as fallbackPublications, site } from '@/config/site'
 import { getContent, type AcademiaContent, type PublicationItem, type LinkedInPost } from '@/lib/content'
 import { useSiteSettings } from '@/lib/site-context'
 import { ResearchConstellation } from '@/components/ResearchConstellation'
+import { SocialIcon } from '@/components/SocialIcons'
 import { linkedinPosts as fallbackLinkedInPosts } from '@/config/site'
 
 export const Route = createFileRoute('/academia/')({
@@ -122,7 +123,7 @@ function LinkedInUpdates({ items }: { items: LinkedInPost[] }) {
           <h2 className="mt-2 text-3xl font-semibold md:text-4xl">Recent on LinkedIn<span className="text-terracotta">.</span></h2>
         </div>
         <a href="https://www.linkedin.com/in/umang-soni420/" target="_blank" rel="noreferrer" className="hidden items-center gap-2 text-sm font-semibold hover:text-terracotta sm:inline-flex">
-          <Linkedin className="size-4" /> View profile <ExternalLink className="size-3.5" />
+          <SocialIcon name="linkedin" className="size-4" /> View profile <ExternalLink className="size-3.5" />
         </a>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
