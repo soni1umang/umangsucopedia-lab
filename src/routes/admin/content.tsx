@@ -4,13 +4,13 @@ import { ArrowDown, ArrowUp, ImagePlus, Link2, Plus, Save, Trash2, RotateCcw, Ey
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings, type WorkbenchItem, type QuestionItem } from '@/lib/content'
-import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, workbench as fallbackWorkbench, questions as fallbackQuestions, ucopediaHistory as fallbackHistory } from '@/config/site'
+import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, workbench as fallbackWorkbench, questions as fallbackQuestions, ucopediaHistory as fallbackHistory, linkedinPosts as fallbackLinkedInPosts } from '@/config/site'
 
-type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'workbench' | 'questions' | 'unpolished_beginner' | 'photography' | 'paintings'
-const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', workbench:'Workbench', questions:'Questions', unpolished_beginner:'Unpolished beginner', photography:'Photography', paintings:'Paints' }
+type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'linkedin_posts' | 'workbench' | 'questions' | 'unpolished_beginner' | 'photography' | 'paintings'
+const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', linkedin_posts:'LinkedIn posts', workbench:'Workbench', questions:'Questions', unpolished_beginner:'Unpolished beginner', photography:'Photography', paintings:'Paints' }
 const defaultSiteSettings: SiteSettings = { ...site, socials: socials.map((s) => ({ ...s, enabled: s.key !== 'instagram2', icon: s.key === 'instagram2' ? 'instagram' : s.key as any })) }
 const publications: PublicationItem[] = []
-const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, workbench:fallbackWorkbench, questions:fallbackQuestions, unpolished_beginner:fallbackHistory, photography:albums, paintings }
+const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, linkedin_posts:fallbackLinkedInPosts, workbench:fallbackWorkbench, questions:fallbackQuestions, unpolished_beginner:fallbackHistory, photography:albums, paintings }
 const DRAFT_STORAGE_PREFIX = 'ucopedia-content-draft-v1:'
 function readBrowserDraft(userId:string): { updatedAt:number; drafts:Record<Key,unknown> } | null {
   try {
@@ -188,6 +188,7 @@ function ContentStudio() {
         {active==='academia' && <AcademiaEditor value={draft as AcademiaContent} setValue={setDraft}/>} 
         {active==='portfolio' && <PortfolioEditor value={draft as PortfolioItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='publications' && <PublicationsEditor value={draft as PublicationItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
+        {active==='linkedin_posts' && <LinkedInPostsEditor value={draft as LinkedInPost[]} setValue={setDraft}/>}
         {active==='workbench' && <WorkbenchEditor value={draft as WorkbenchItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='questions' && <QuestionsEditor value={draft as QuestionItem[]} setValue={setDraft}/>} 
         {active==='unpolished_beginner' && <HistoryEditor value={draft as WebsiteAttempt[]} setValue={setDraft}/>}
@@ -402,6 +403,30 @@ function HistoryEditor({value,setValue}:{value:WebsiteAttempt[];setValue:Dispatc
         <div className='mt-4 grid gap-4 md:grid-cols-2'>
           <Field label='What was this attempt?'><TextArea rows={5} value={p.description} onChange={e=>update(i,{description:e.target.value})} placeholder='What were you trying to build?'/></Field>
           <Field label='What did it teach you?'><TextArea rows={5} value={p.lesson} onChange={e=>update(i,{lesson:e.target.value})} placeholder='What did you learn from this version?'/></Field>
+        </div>
+      </div>)}
+    </div>
+  </Card>
+}
+
+
+function LinkedInPostsEditor({value,setValue}:{value:LinkedInPost[];setValue:Dispatch<SetStateAction<unknown>>}) {
+  function update(i:number,p:Partial<LinkedInPost>){setValue(v=>(v as LinkedInPost[]).map((x,n)=>n===i?{...x,...p}:x))}
+  function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
+  return <Card title='LinkedIn posts' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{embed_code:'',title:'',enabled:true}])}><Plus className='size-4'/> Add post</button>}>
+    <div className='mb-6 rounded-xl border border-saffron/40 bg-saffron/15 p-4 text-sm leading-relaxed text-ink/70'>
+      <strong className='text-ink'>Paste the official LinkedIn embed code here.</strong> On LinkedIn desktop, open your public post → <strong>⋯ → Embed this post → Copy code</strong>. Only the iframe part is used on your website. LinkedIn requires the original post to be public for the embed to work.
+    </div>
+    <div className='space-y-5'>
+      {value.map((p,i)=><div key={i} className='rounded-2xl border border-ink/10 bg-paper p-5 md:p-6'>
+        <div className='mb-4 flex items-start justify-between gap-3'>
+          <div><p className='font-mono text-[.6rem] uppercase tracking-widest text-terracotta'>Post {String(i+1).padStart(2,'0')}</p><h3 className='mt-1 font-semibold'>{p.title||'Untitled LinkedIn post'}</h3></div>
+          <ItemActions index={i} total={value.length} label='LinkedIn post' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/>
+        </div>
+        <div className='grid gap-4'>
+          <Field label='Admin label (optional)' hint='Only you see this label in the dashboard.'><TextInput value={p.title??''} onChange={e=>update(i,{title:e.target.value})} placeholder='e.g. QMAT 2026 — award announcement'/></Field>
+          <Field label='LinkedIn embed code' hint='Paste the complete code from LinkedIn. You do not need to edit it.'><TextArea rows={7} value={p.embed_code} onChange={e=>update(i,{embed_code:e.target.value})} placeholder='<iframe src="https://www.linkedin.com/embed/feed/update/…"></iframe>' /></Field>
+          <label className='flex items-center gap-2 text-sm font-semibold'><input type='checkbox' checked={p.enabled !== false} onChange={e=>update(i,{enabled:e.target.checked})}/> Show on Academia</label>
         </div>
       </div>)}
     </div>
