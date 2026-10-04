@@ -8,7 +8,7 @@ import { img } from '@/lib/img'
 import { categoryArt } from '@/config/category-art'
 import { getContent, type WebsiteAttempt } from '@/lib/content'
 import { ucopediaHistory as fallbackHistory } from '@/config/site'
-import { ArrowUpRight, Archive, Globe2, History } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 function descendantIds(all: any[], root: number) {
   const ids = [root]
