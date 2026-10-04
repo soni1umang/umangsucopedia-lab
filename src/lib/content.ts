@@ -53,6 +53,7 @@ export type WorkbenchItem = {
   link: string
   images?: string[]
   featured?: boolean
+  show_on_now?: boolean
 }
 
 export type QuestionItem = {
