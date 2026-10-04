@@ -1,5 +1,31 @@
 import {supabase} from '@/lib/supabase'
 
+export function slugifyTag(value:string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'')
+}
+
+export function tagIndex(posts:any[]) {
+  const map = new Map<string,{slug:string;name:string;count:number}>()
+  for (const post of posts) {
+    const seen = new Set<string>()
+    for (const raw of Array.isArray(post.tags) ? post.tags : []) {
+      const name = String(raw).trim()
+      const slug = slugifyTag(name)
+      if (!name || !slug || seen.has(slug)) continue
+      seen.add(slug)
+      const current = map.get(slug)
+      map.set(slug, current ? {...current,count:current.count+1} : {slug,name,count:1})
+    }
+  }
+  return [...map.values()].sort((a,b)=>b.count-a.count || a.name.localeCompare(b.name))
+}
+
 export function descendantCategoryIds(all:any[], rootId:any) {
   const root = String(rootId)
   const ids = [root]
