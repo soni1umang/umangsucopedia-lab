@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { FolderPlus, LogOut, PenLine, Plus, Trash2, FileText, Settings2 } from 'lucide-react'
+import { Activity, FolderPlus, FlaskConical, LogOut, PenLine, Plus, Radio, Sparkles, Trash2, FileText, Settings2, Wrench, BookOpen } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 
@@ -81,17 +81,28 @@ function Admin() {
 
   return (
     <section className="container-uco py-12 md:py-16">
-      <div className="flex flex-wrap items-end justify-between gap-5">
-        <div>
-          <p className="eyebrow">Your writing desk</p>
-          <h1 className="mt-3 font-display text-5xl font-semibold">Dashboard<span className="text-terracotta">.</span></h1>
-          <p className="mt-3 text-ink/65">{user.email}</p>
+      <div className="lab-panel lab-grid relative overflow-hidden rounded-[2rem] border-2 border-ink bg-ink p-7 text-paper shadow-[9px_9px_0_var(--color-saffron)] md:p-9">
+        <div className="absolute right-0 top-0 size-64 rounded-full bg-saffron/10 blur-3xl"/>
+        <div className="relative flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 font-mono text-[.62rem] uppercase tracking-[.2em] text-saffron"><span className="size-2 animate-pulse rounded-full bg-leaf"/> Ucopedia laboratory / control room</div>
+            <h1 className="mt-4 font-display text-5xl font-semibold md:text-6xl">Dashboard<span className="text-saffron">.</span></h1>
+            <p className="mt-3 text-paper/60">{user.email} · instruments online</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/admin/content" className="btn-saffron !shadow-none"><Settings2 className="size-4" /> Content Studio</Link>
+            <Link to="/admin/posts/new" className="btn-ghost border-paper/20 text-paper hover:border-saffron hover:bg-paper/10"><Plus className="size-4" /> New post</Link>
+            <button className="btn-ghost border-paper/20 text-paper hover:border-saffron hover:bg-paper/10" onClick={() => void logout().then(() => location.href = import.meta.env.BASE_URL)}><LogOut className="size-4" /> Sign out</button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/admin/content" className="btn-ghost"><Settings2 className="size-4" /> Site content</Link>
-          <Link to="/admin/posts/new" className="btn-ink"><Plus className="size-4" /> New post</Link>
-          <button className="btn-ghost" onClick={() => void logout().then(() => location.href = import.meta.env.BASE_URL)}><LogOut className="size-4" /> Sign out</button>
-        </div>
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ['LIVE NOTEBOOK','Now','/now',Radio],
+          ['RESEARCH','Publications','/academia/publications',BookOpen],
+          ['WORKBENCH','Build log','/workbench',Wrench],
+          ['SITE EDITOR','Everything','/admin/content',FlaskConical],
+        ].map(([eyebrow,label,to,Icon])=><Link key={String(to)} to={String(to)} className="group rounded-2xl border border-ink/10 bg-card p-5 transition hover:-translate-y-1 hover:border-ink hover:shadow-[6px_6px_0_var(--color-saffron)]"><Icon className="size-5 text-terracotta transition group-hover:rotate-[-8deg]"/><p className="mt-5 font-mono text-[.58rem] uppercase tracking-[.18em] text-ink/40">{String(eyebrow)}</p><p className="mt-1 font-display text-xl font-semibold">{String(label)}</p><Activity className="mt-4 size-3.5 text-leaf"/></Link>)}
       </div>
 
       {error && <p className="mt-6 rounded-lg bg-terracotta/10 px-4 py-3 text-sm text-terracotta">{error}</p>}
