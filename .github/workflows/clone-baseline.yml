@@ -18,21 +18,14 @@ jobs:
 
       - name: Copy stable v2
         run: |
-          rm -rf ./*
-          rm -rf .[^.]* 2>/dev/null || true
+          rm -rf /tmp/ucopedia-v2
           git clone --depth 1 https://github.com/soni1umang/umangsucopedia-v2.git /tmp/ucopedia-v2
-          cp -a /tmp/ucopedia-v2/. .
-          rm -rf .git
+          rsync -a --delete --exclude='.git' /tmp/ucopedia-v2/ ./
 
-      - name: Re-create git metadata
-        env:
-          GITHUB_TOKEN: ${GITHUB_TOKEN}
+      - name: Commit baseline into Lab
         run: |
-          git init
-          git checkout -B main
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Clone stable Ucopedia v2 baseline"
-          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push origin main --force
+          git commit -m "Clone stable Ucopedia v2 baseline" || exit 0
+          git push origin main
