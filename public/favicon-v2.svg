@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ucopedia">
+<rect width="64" height="64" rx="16" fill="#1c2146"/>
+<path d="M16 14v22c0 10.7 6.8 17 16 17s16-6.3 16-17V14h-9v21.5c0 5.8-2.2 9.5-7 9.5s-7-3.7-7-9.5V14z" fill="#f5ecd9"/>
+<circle cx="49" cy="15" r="6" fill="#eab53a"/>
+</svg>
