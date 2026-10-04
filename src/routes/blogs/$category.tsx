@@ -5,6 +5,7 @@ import { categories, posts } from '@/data/blog'
 import { PostCard } from '@/components/PostCard'
 import { CategoryCard } from '@/components/CategoryCard'
 import { img } from '@/lib/img'
+import { categoryArt } from '@/config/category-art'
 
 function descendantIds(all: any[], root: number) {
   const ids = [root]
@@ -46,7 +47,7 @@ function Category() {
   const { category, all, posts: postList } = state
   const children = all.filter((c: any) => c.parent_id === category.id)
   const chain = ancestors(all, category)
-  const cover = category.cover_image || chain.find((c: any) => c.cover_image)?.cover_image
+  const cover = categoryArt[category.slug] || category.cover_image || chain.find((c: any) => c.cover_image)?.cover_image
 
   return (
     <>
