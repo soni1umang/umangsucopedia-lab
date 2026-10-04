@@ -138,6 +138,24 @@ export const paintings: (Photo & { title: string; medium: string; year: string }
 
 export const publications: import('@/lib/content').PublicationItem[] = []
 
+export const now: import('@/lib/content').NowItem[] = [
+  { label: 'BUILDING', title: 'RF reflectometry for mesoscopic charge sensing', detail: 'Designing a high-Q readout chain and learning what the device is trying to tell me.', status: 'Active' },
+  { label: 'INVESTIGATING', title: 'Ge/SiGe devices', detail: 'Chasing mobility, contacts, interfaces and the small details that decide whether a beautiful device actually behaves.', status: 'Active' },
+  { label: 'MAKING', title: 'Small machines after hours', detail: 'Electronics, automation and the occasional idea that starts with “how hard could it be?”', status: 'Experiment' },
+  { label: 'LEARNING', title: 'Violin from first principles', detail: 'Learning to hear pitch, rhythm and music theory instead of merely moving my fingers.', status: 'Learning' },
+]
+
+export const workbench: import('@/lib/content').WorkbenchItem[] = [
+  { title: 'Room automation', kind: 'Electronics', status: 'Experiment', goal: 'Make a room quietly intelligent.', description: 'Arduino, relays, sensors and the little systems that make everyday life easier.', learning: 'Designing things for humans is harder than making them switch on.', next: 'Build the first reliable control panel.', link: '', images: [], featured: true },
+  { title: 'RF readout bench', kind: 'Research', status: 'Active', goal: 'Turn tiny charge changes into a clean electrical signal.', description: 'Lumped resonators, matching networks, QPCs and a lot of careful debugging.', learning: 'The measurement chain is part of the experiment.', next: 'Tighten the matching and noise budget.', link: '', images: [], featured: true },
+]
+
+export const questions: import('@/lib/content').QuestionItem[] = [
+  { question: 'What makes a measurement non-invasive?', note: 'A question that sits somewhere between device physics, instrumentation and philosophy.', tags: ['measurement', 'quantum'] },
+  { question: 'Why do imperfect materials become interesting?', note: 'Defects, disorder and interfaces often decide what a device can actually do.', tags: ['materials', 'devices'] },
+  { question: 'Can a machine make us more curious?', note: 'A running question behind many of my side projects and technological rabbit holes.', tags: ['technology', 'mind'] },
+]
+
 export const sideHustles = [
   {
     title: 'Side project one',
