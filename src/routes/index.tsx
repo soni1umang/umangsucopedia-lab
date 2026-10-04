@@ -12,7 +12,7 @@ import { ResearchConstellation } from '@/components/ResearchConstellation'
 
 export const Route = createFileRoute('/')({
   loader: async () => {
-    const [latest, cs, aboutData, photoData, paintData, nowData, workbenchData] = await Promise.all([
+    const [latest, cs, aboutData, photoData, paintData, workbenchData] = await Promise.all([
       posts(), categories(),
       getContent<AboutContent>('about', about),
       getContent<Album[]>('photography', albums),
