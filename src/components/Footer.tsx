@@ -12,12 +12,9 @@ export function Footer({ nav }: { nav: NavItem[] }) {
     <footer className="mt-24 bg-ink text-paper">
       <div className="container-uco grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <p className="font-display text-4xl font-semibold">
-            {settings.name}
-            <span className="text-saffron">.</span>
-          </p>
-          <p className="mt-2 font-display text-lg italic text-paper/70">{settings.tagline}</p>
-          <p className="mt-6 max-w-sm text-sm leading-relaxed text-paper/60">{settings.description}</p>
+          <div className="flex items-end gap-2"><p className="font-display text-4xl font-semibold">{settings.name}<span className="text-saffron">.</span></p><span className="mb-1 font-mono text-[.58rem] uppercase tracking-[.22em] text-saffron">lab</span></div>
+          <p className="mt-2 font-display text-lg italic text-paper/70">The curious laboratory.</p>
+          <p className="mt-6 max-w-sm text-sm leading-relaxed text-paper/60">Research, questions, experiments and side quests — documented as they happen.</p>
           <SocialLinks
             links={settings.socials}
             className="mt-6 flex-wrap gap-2"
