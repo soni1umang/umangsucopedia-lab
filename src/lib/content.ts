@@ -73,6 +73,12 @@ export type QuestionItem = {
   tags?: string[]
 }
 
+export type LinkedInPost = {
+  embed_code: string
+  title?: string
+  enabled?: boolean
+}
+
 export type PublicationItem = {
   title: string
   doi: string
