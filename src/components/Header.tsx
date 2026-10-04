@@ -153,17 +153,15 @@ export function Header({ nav }: { nav: NavItem[] }) {
       )}
     >
       <div className="container-uco flex h-16 items-center gap-6">
-        <Link to="/" className="group flex items-baseline gap-2" aria-label={`${settings.title} home`}>
-          <span className="grid size-8 place-items-center rounded-full bg-ink font-display text-lg font-bold text-saffron transition group-hover:rotate-[-8deg]">
-            U
+        <Link to="/" className="group flex items-center gap-2.5" aria-label="Ucopedia home">
+          <span className="relative grid size-9 place-items-center rounded-full bg-ink font-display text-lg font-bold text-saffron transition group-hover:rotate-[-8deg]">
+            U<span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-terracotta"/>
           </span>
-          <span className="font-display text-xl font-semibold tracking-tight text-ink">
-            {settings.name}
-            <span className="text-terracotta">.</span>
+          <span className="leading-none">
+            <span className="block font-display text-xl font-semibold tracking-tight text-ink">{settings.name}<span className="text-terracotta">.</span><span className="ml-1 font-mono text-[.62rem] font-semibold uppercase tracking-[.18em] text-terracotta">lab</span></span>
+            <span className="mt-1 hidden font-mono text-[.48rem] uppercase tracking-[.24em] text-ink/35 sm:block">the curious laboratory</span>
           </span>
-        </Link>
-
-        <nav aria-label="Main" className="ml-auto hidden lg:block">
+        </Link>    <nav aria-label="Main" className="ml-auto hidden lg:block">
           <ul className="flex items-center gap-0.5">
             {nav.map((item) => (
               <li key={item.to} className="group relative">
