@@ -34,6 +34,34 @@ export type SideHustleItem = {
   images?: string[]
 }
 
+export type NowItem = {
+  label: string
+  title: string
+  detail: string
+  status: string
+  href?: string
+}
+ 
+export type WorkbenchItem = {
+  title: string
+  kind: string
+  status: string
+  goal: string
+  description: string
+  learning: string
+  next: string
+  link: string
+  images?: string[]
+  featured?: boolean
+}
+
+export type QuestionItem = {
+  question: string
+  note: string
+  href?: string
+  tags?: string[]
+}
+
 export type PublicationItem = {
   title: string
   doi: string
