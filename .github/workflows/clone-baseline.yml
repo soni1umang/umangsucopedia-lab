@@ -20,7 +20,7 @@ jobs:
         run: |
           rm -rf /tmp/ucopedia-v2
           git clone --depth 1 https://github.com/soni1umang/umangsucopedia-v2.git /tmp/ucopedia-v2
-          rsync -a --delete --exclude='.git' /tmp/ucopedia-v2/ ./
+          rsync -a --delete --exclude='.git' --exclude='.github/workflows/deploy.yml' /tmp/ucopedia-v2/ ./
 
       - name: Commit baseline into Lab
         run: |
