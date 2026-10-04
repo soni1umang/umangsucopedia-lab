@@ -19,7 +19,7 @@ export const Route = createFileRoute('/')({
       getContent<NowItem[]>('now', fallbackNow),
       getContent<WorkbenchItem[]>('workbench', fallbackWorkbench),
     ])
-    return { latest: latest.slice(0, 5), categories: cs, about: aboutData, albums: photoData, paintings: paintData, now: nowData, workbench: workbenchData }
+    return { allPosts: latest, latest: latest.slice(0, 5), categories: cs, about: aboutData, albums: photoData, paintings: paintData, now: nowData, workbench: workbenchData }
   },
   component: Home,
 })
@@ -33,7 +33,7 @@ function SignalTrace() {
 
 function Home() {
   const settings = useSiteSettings()
-  const { latest, categories, about: aboutData, albums, paintings: paintData, now: nowItems, workbench } = Route.useLoaderData()
+  const { allPosts, latest, categories, about: aboutData, albums, paintings: paintData, now: nowItems, workbench } = Route.useLoaderData()
   const [featured, ...rest] = latest
   const activeNow = nowItems.slice(0, 3)
   const featuredBench = workbench.filter(w => w.featured).slice(0, 2)
