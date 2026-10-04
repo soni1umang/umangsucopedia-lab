@@ -136,6 +136,33 @@ export const paintings: (Photo & { title: string; medium: string; year: string }
   { src: '/img/paint-3.jpg', title: 'Tides of Thought', medium: 'Gouache', year: '2024', caption: 'An abstract study in circles and waves.' },
 ]
 
+export const ucopediaHistory: import('@/lib/content').WebsiteAttempt[] = [
+  {
+    title: 'The first Ucopedia',
+    platform: 'Blogger',
+    era: '≈ 2016',
+    url: 'https://ucopedia.blogspot.com/',
+    description: 'One of the earliest places where I tried to make the internet feel like mine — a blog, an identity, a little universe of ideas.',
+    lesson: 'The first lesson was simply that I wanted a place to collect everything that caught my attention.',
+  },
+  {
+    title: 'A WordPress attempt',
+    platform: 'WordPress',
+    era: 'Later',
+    url: '',
+    description: 'Another attempt at turning scattered thoughts into a proper personal website.',
+    lesson: 'I kept changing the container because I was still figuring out what belonged inside it.',
+  },
+  {
+    title: 'A Wix attempt',
+    platform: 'Wix',
+    era: 'Later',
+    url: '',
+    description: 'A more visual experiment — another try at designing a home on the web.',
+    lesson: 'The more I experimented with presentation, the more I realised the real problem was deciding what I wanted to say.',
+  },
+]
+
 export const publications: import('@/lib/content').PublicationItem[] = []
 
 export const now: import('@/lib/content').NowItem[] = [
