@@ -142,3 +142,64 @@
   from { transform: translateX(0); }
   to { transform: translateX(-33.333%); }
 }
+
+
+@keyframes pulseSignal {
+  0%,100% { transform: scaleX(.92); opacity:.5; }
+  50% { transform: scaleX(1); opacity:1; }
+}
+@keyframes floatNode {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity:0; }
+  20% { opacity:.5; }
+  80% { opacity:.15; }
+  100% { transform: translateY(100%); opacity:0; }
+}
+@keyframes drift {
+  0% { transform: translate3d(-3%,0,0); }
+  50% { transform: translate3d(3%,-1%,0); }
+  100% { transform: translate3d(-3%,0,0); }
+}
+
+.lab-grid {
+  background-image:
+    linear-gradient(rgb(28 33 70 / .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(28 33 70 / .06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.lab-panel {
+  position: relative;
+  overflow: hidden;
+}
+.lab-panel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(to bottom, transparent, rgb(234 181 58 / .08), transparent);
+  pointer-events: none;
+  animation: scanline 7s ease-in-out infinite;
+}
+.signal-pulse {
+  animation: pulseSignal 3s ease-in-out infinite;
+}
+.float-node {
+  animation: floatNode 5s ease-in-out infinite;
+}
+.drift {
+  animation: drift 12s ease-in-out infinite;
+}
+.research-card {
+  transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1), border-color .3s ease;
+}
+.research-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 10px 10px 0 var(--color-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .signal-pulse,.float-node,.drift,.lab-panel::after { animation: none !important; }
+}
