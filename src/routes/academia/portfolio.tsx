@@ -7,7 +7,7 @@ import { img } from '@/lib/img'
 
 export const Route = createFileRoute('/academia/portfolio')({
   loader: () => getContent<PortfolioItem[]>('portfolio', portfolio),
-  head: () => ({ meta: [{ title: `Portfolio · ${site.title}` }] }),
+  head: () => ({ meta: [{ title: `Academic work · ${site.title}` }] }),
   component: Portfolio,
 })
 
@@ -21,8 +21,8 @@ function Portfolio() {
           <ChevronRight className="size-3.5" /> Portfolio
         </nav>
       </div>
-      <PageHeader eyebrow="Selected work" title={<>Portfolio<span className="text-terracotta">.</span></>}>
-        A running record of projects, papers, presentations and recognitions.
+      <PageHeader eyebrow="Research record" title={<>Academic work<span className="text-terracotta">.</span></>}>
+        Projects, talks, awards and other research milestones — the work around the publications.
       </PageHeader>
       <section className="container-uco">
         <ul className="divide-y-2 divide-ink/10 border-y-2 border-ink">
