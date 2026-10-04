@@ -1,25 +1,27 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, BookOpen, ExternalLink, GraduationCap, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, ExternalLink, GraduationCap, Sparkles, Linkedin } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { academia, publications as fallbackPublications, site } from '@/config/site'
-import { getContent, type AcademiaContent, type PublicationItem } from '@/lib/content'
+import { getContent, type AcademiaContent, type PublicationItem, type LinkedInPost } from '@/lib/content'
 import { useSiteSettings } from '@/lib/site-context'
 import { ResearchConstellation } from '@/components/ResearchConstellation'
+import { linkedinPosts as fallbackLinkedInPosts } from '@/config/site'
 
 export const Route = createFileRoute('/academia/')({
   loader: async () => {
-    const [data, pubs] = await Promise.all([
+    const [data, pubs, linkedIn] = await Promise.all([
       getContent<AcademiaContent>('academia', academia),
       getContent<PublicationItem[]>('publications', fallbackPublications),
+      getContent<LinkedInPost[]>('linkedin_posts', fallbackLinkedInPosts),
     ])
-    return { data, pubs }
+    return { data, pubs, linkedIn }
   },
   head: () => ({ meta: [{ title: `Academia · ${site.title}` }] }),
   component: Academia,
 })
 
 function Academia() {
-  const { data, pubs } = Route.useLoaderData()
+  const { data, pubs, linkedIn } = Route.useLoaderData()
   const settings = useSiteSettings()
   const featured = pubs.find((p) => p.featured) ?? pubs[0]
   return (
@@ -68,6 +70,8 @@ function Academia() {
         </aside>
       </section>
 
+      <LinkedInUpdates items={linkedIn} />
+
       {featured && (
         <section className="container-uco pt-16">
           <div className="relative overflow-hidden rounded-[2rem] border-2 border-ink bg-card p-7 md:p-9">
@@ -87,5 +91,59 @@ function Academia() {
         </section>
       )}
     </>
+  )
+}
+
+
+function linkedinSrc(code: string): string | null {
+  const value = code.trim()
+  if (!value) return null
+  const iframe = value.match(/<iframe[^>]+src=["']([^"']+)["']/i)?.[1]
+  const candidate = iframe || (value.startsWith('https://www.linkedin.com/embed/') || value.startsWith('https://linkedin.com/embed/') ? value : null)
+  if (!candidate) return null
+  try {
+    const u = new URL(candidate)
+    if (!/^(www\.)?linkedin\.com$/i.test(u.hostname) || !u.pathname.startsWith('/embed/')) return null
+    return u.toString()
+  } catch {
+    return null
+  }
+}
+
+function LinkedInUpdates({ items }: { items: LinkedInPost[] }) {
+  const valid = items.filter((p) => p.enabled !== false).map((p) => ({ ...p, src: linkedinSrc(p.embed_code) })).filter((p): p is LinkedInPost & { src: string } => Boolean(p.src))
+  if (!valid.length) return null
+
+  return (
+    <section className="container-uco pt-16 md:pt-20">
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">Academic notebook</p>
+          <h2 className="mt-2 text-3xl font-semibold md:text-4xl">Recent on LinkedIn<span className="text-terracotta">.</span></h2>
+        </div>
+        <a href="https://www.linkedin.com/in/umang-soni420/" target="_blank" rel="noreferrer" className="hidden items-center gap-2 text-sm font-semibold hover:text-terracotta sm:inline-flex">
+          <Linkedin className="size-4" /> View profile <ExternalLink className="size-3.5" />
+        </a>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {valid.slice(0, 4).map((p, i) => (
+          <article key={p.embed_code + i} className="overflow-hidden rounded-2xl border border-ink/10 bg-card">
+            <iframe
+              src={p.src}
+              title={p.title || 'LinkedIn post'}
+              loading="lazy"
+              className="min-h-[520px] w-full"
+              frameBorder="0"
+              allowFullScreen
+            />
+          </article>
+        ))}
+      </div>
+      <div className="mt-5 sm:hidden">
+        <a href="https://www.linkedin.com/in/umang-soni420/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-terracotta">
+          <Linkedin className="size-4" /> View profile <ExternalLink className="size-3.5" />
+        </a>
+      </div>
+    </section>
   )
 }
