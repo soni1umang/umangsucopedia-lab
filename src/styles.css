@@ -1,0 +1,144 @@
+@import "tailwindcss" source("../");
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  --color-paper: #f5ecd9;
+  --color-paper-deep: #ecdfc3;
+  --color-ink: #1c2146;
+  --color-ink-soft: #3a4070;
+  --color-saffron: #eab53a;
+  --color-terracotta: #b9502e;
+  --color-leaf: #4f6b4a;
+}
+
+:root {
+  --background: #f5ecd9;
+  --foreground: #1c2146;
+  --card: #fbf6ea;
+  --card-foreground: #1c2146;
+  --popover: #fbf6ea;
+  --popover-foreground: #1c2146;
+  --primary: #1c2146;
+  --primary-foreground: #f5ecd9;
+  --secondary: #ecdfc3;
+  --secondary-foreground: #1c2146;
+  --muted: #ecdfc3;
+  --muted-foreground: #5b5f7e;
+  --accent: #eab53a;
+  --accent-foreground: #1c2146;
+  --destructive: #b9502e;
+  --destructive-foreground: #fbf6ea;
+  --border: #d9c9a6;
+  --input: #d9c9a6;
+  --ring: #eab53a;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply m-0 bg-background font-sans text-foreground antialiased;
+    /* subtle paper grain */
+    background-image: radial-gradient(rgb(28 33 70 / 0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    @apply bg-saffron text-ink;
+  }
+}
+
+@layer components {
+  .container-uco {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .eyebrow {
+    @apply font-mono text-[0.7rem] uppercase tracking-[0.2em] text-terracotta;
+  }
+  .btn-ink {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 bg-ink text-paper hover:bg-ink-soft;
+  }
+  .btn-saffron {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 bg-saffron text-ink shadow-[3px_3px_0_var(--color-ink)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--color-ink)];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 border border-ink/20 text-ink hover:border-ink hover:bg-paper-deep;
+  }
+  .field {
+    @apply w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm text-ink placeholder:text-ink/40 focus:border-ink focus:outline-none focus:ring-2 focus:ring-saffron/50;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink/70;
+  }
+}
+
+/* Long-form article typography for markdown posts */
+.prose-uco {
+  @apply text-[1.075rem] leading-[1.8] text-ink/90;
+}
+.prose-uco > * + * { margin-top: 1.15em; }
+.prose-uco h2 { @apply mt-12 text-3xl font-semibold text-ink; }
+.prose-uco h3 { @apply mt-10 text-2xl font-semibold text-ink; }
+.prose-uco h4 { @apply mt-8 text-xl font-semibold text-ink; }
+.prose-uco a { @apply text-terracotta underline decoration-saffron decoration-2 underline-offset-4 hover:decoration-terracotta; }
+.prose-uco strong { @apply font-semibold text-ink; }
+.prose-uco ul { @apply list-disc pl-6 marker:text-terracotta; }
+.prose-uco ol { @apply list-decimal pl-6 marker:font-mono marker:text-terracotta; }
+.prose-uco li + li { margin-top: 0.4em; }
+.prose-uco blockquote { @apply border-l-4 border-saffron bg-paper-deep/60 py-3 pl-5 pr-4 font-display text-xl italic text-ink; }
+.prose-uco img { @apply my-8 w-full rounded-xl border border-ink/10; }
+.prose-uco hr { @apply my-12 border-dashed border-ink/20; }
+.prose-uco code { @apply rounded bg-paper-deep px-1.5 py-0.5 font-mono text-[0.9em]; }
+.prose-uco pre { @apply overflow-x-auto rounded-xl bg-ink p-5 text-sm text-paper; }
+.prose-uco pre code { @apply bg-transparent p-0 text-paper; }
+.prose-uco table { @apply w-full border-collapse text-sm; }
+.prose-uco th, .prose-uco td { @apply border border-border px-3 py-2 text-left; }
+.prose-uco > p:first-child::first-letter {
+  @apply float-left mr-3 mt-1 font-display text-7xl font-semibold leading-[0.8] text-terracotta;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
