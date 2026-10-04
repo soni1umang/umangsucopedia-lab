@@ -4,7 +4,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: '/umangsucopedia-v2/',
+  base: '/umangsucopedia-lab/',
   resolve: { tsconfigPaths: true },
   plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), tailwindcss(), react()],
 })
