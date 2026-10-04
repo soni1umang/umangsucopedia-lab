@@ -203,3 +203,38 @@
 @media (prefers-reduced-motion: reduce) {
   .signal-pulse,.float-node,.drift,.lab-panel::after { animation: none !important; }
 }
+
+
+/* The resident cat: a small, low-key bit of life in the laboratory. */
+.house-cat-layer { position:fixed; inset:auto 0 0; z-index:30; height:132px; pointer-events:none; overflow:visible; }
+.house-cat { position:absolute; bottom:13px; width:116px; border:0; padding:0; margin:0; background:transparent; color:var(--color-ink); cursor:pointer; pointer-events:auto; transition-property:left; transition-timing-function:cubic-bezier(.45,0,.55,1); filter:drop-shadow(0 5px 3px rgb(28 33 70 / .08)); outline:none; }
+.house-cat:focus-visible { border-radius:16px; outline:2px solid var(--color-saffron); outline-offset:4px; }
+.house-cat-svg { display:block; width:100%; height:auto; overflow:visible; }
+.cat-line { stroke:var(--color-ink); stroke-width:2.7; stroke-linecap:round; stroke-linejoin:round; }
+.cat-whisker { stroke:var(--color-ink); stroke-width:1.3; opacity:.55; }
+.house-cat-walking .cat-leg-a { animation:catStepA .42s ease-in-out infinite alternate; transform-origin:80px 65px; }
+.house-cat-walking .cat-leg-b { animation:catStepB .42s ease-in-out infinite alternate; transform-origin:86px 65px; }
+.house-cat-walking .house-cat-svg { animation:catBodyBob .42s ease-in-out infinite alternate; }
+.house-cat-sit .house-cat-svg,.house-cat-look .house-cat-svg { animation:catBreath 2.8s ease-in-out infinite; }
+.house-cat-sleep .house-cat-svg { animation:catSleep 4.5s ease-in-out infinite; }
+.house-cat-run { filter:drop-shadow(0 6px 2px rgb(28 33 70 / .14)); }
+.house-cat-run .house-cat-svg { animation:catRunBob .14s linear infinite alternate; }
+.cat-message { position:absolute; right:24px; bottom:78px; white-space:nowrap; border:1px solid rgb(28 33 70 / .12); border-radius:999px; background:var(--color-card); padding:5px 9px; color:rgb(28 33 70 / .66); font-family:var(--font-mono); font-size:.58rem; letter-spacing:.12em; box-shadow:3px 3px 0 rgb(28 33 70 / .08); animation:catMessage .25s ease-out both; }
+.cat-trails { position:absolute; left:0; right:0; bottom:14px; height:36px; pointer-events:none; opacity:.32; }
+.cat-trails span { position:absolute; width:8px; height:11px; border:2px solid var(--color-ink); border-radius:50% 50% 55% 55%; transform:rotate(24deg); opacity:0; animation:catPaw .95s ease-out both; }
+.cat-trails span:nth-child(1){margin-left:8%}.cat-trails span:nth-child(2){margin-left:13%;animation-delay:.18s}.cat-trails span:nth-child(3){margin-left:19%;animation-delay:.36s}.cat-trails span:nth-child(4){margin-left:25%;animation-delay:.54s}
+.cat-z { font-family:var(--font-mono); font-size:10px; fill:var(--color-ink); opacity:.38; }
+.cat-z-2 { font-size:7px; opacity:.22; }
+@keyframes catStepA { from{transform:rotate(15deg) translateY(0)} to{transform:rotate(-15deg) translateY(1px)} }
+@keyframes catStepB { from{transform:rotate(-15deg) translateY(1px)} to{transform:rotate(15deg) translateY(0)} }
+@keyframes catBodyBob { from{transform:translateY(0)} to{transform:translateY(1.5px)} }
+@keyframes catBreath { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(.8px) scaleY(.985)} }
+@keyframes catSleep { 0%,100%{transform:translateY(0) rotate(-.4deg)} 50%{transform:translateY(1px) rotate(.4deg)} }
+@keyframes catRunBob { from{transform:translateY(0) skewX(-2deg)} to{transform:translateY(-2px) skewX(2deg)} }
+@keyframes catMessage { from{opacity:0;transform:translateY(4px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes catPaw { 0%{opacity:0;transform:translateY(5px) scale(.7) rotate(24deg)} 35%{opacity:.5} 100%{opacity:0;transform:translateY(-4px) scale(1) rotate(24deg)} }
+@media (max-width:640px){ .house-cat-layer{height:104px}.house-cat{width:86px;bottom:10px}.cat-message{right:8px;bottom:59px} }
+@media (prefers-reduced-motion:reduce){
+  .house-cat-walking .cat-leg-a,.house-cat-walking .cat-leg-b,.house-cat-walking .house-cat-svg,.house-cat-sit .house-cat-svg,.house-cat-look .house-cat-svg,.house-cat-sleep .house-cat-svg,.house-cat-run .house-cat-svg,.cat-message,.cat-trails span{animation:none!important}
+  .house-cat{transition-duration:0ms!important}
+}
