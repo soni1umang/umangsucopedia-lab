@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Atom, BookOpen, Camera, FlaskConical, Github, Hammer, Map, Paintbrush, Radio, Sparkles } from 'lucide-react'
+import { ArrowRight, Atom, BookOpen, Camera, FlaskConical, Brain, Hammer, Map, Paintbrush, Radio, Sparkles } from 'lucide-react'
 import { posts, categories } from '@/data/blog'
 import { PostCard } from '@/components/PostCard'
 import { SocialLinks } from '@/components/SocialIcons'
@@ -142,7 +142,7 @@ function Home() {
           <div className="mt-10 h-px bg-paper/10"/>
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             <Link to="/questions" className="group rounded-xl border border-paper/10 bg-paper/5 p-4 transition hover:border-saffron/40"><Map className="size-5 text-saffron"/><span className="mt-5 block font-semibold">Questions</span><span className="mt-1 block text-xs text-paper/50">Things I haven’t solved yet.</span><ArrowRight className="mt-5 size-4 transition group-hover:translate-x-1"/></Link>
-            <Link to="/about" className="group rounded-xl border border-paper/10 bg-paper/5 p-4 transition hover:border-saffron/40"><Github className="size-5 text-saffron"/><span className="mt-5 block font-semibold">About</span><span className="mt-1 block text-xs text-paper/50">The person behind the experiments.</span><ArrowRight className="mt-5 size-4 transition group-hover:translate-x-1"/></Link>
+            <Link to="/about" className="group rounded-xl border border-paper/10 bg-paper/5 p-4 transition hover:border-saffron/40"><Brain className="size-5 text-saffron"/><span className="mt-5 block font-semibold">About</span><span className="mt-1 block text-xs text-paper/50">The person behind the experiments.</span><ArrowRight className="mt-5 size-4 transition group-hover:translate-x-1"/></Link>
           </div>
         </div>
       </div>
