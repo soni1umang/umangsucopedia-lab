@@ -1,6 +1,2 @@
-# Ucopedia Lab
-
-Experimental redesign of Ucopedia. This repository is a playground and does not affect the stable Ucopedia v2 site.
-
-
-Baseline import workflow fixed and re-armed.
+# umangsucopedia-v2
+v2 of my site. Personal website and Ucopedia with a self-hosted content management system.

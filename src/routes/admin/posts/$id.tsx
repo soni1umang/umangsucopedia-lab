@@ -1,0 +1,1 @@
+import {createFileRoute} from '@tanstack/react-router';import {Editor} from '@/components/AdminPostEditor';export const Route=createFileRoute('/admin/posts/$id')({component:()=> <Editor id={Number(Route.useParams().id)}/>});

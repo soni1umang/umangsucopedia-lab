@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Owner login · Ucopedia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#f5ecd9;--card:#fbf6ea;--ink:#1c2146;--ink-soft:#3a4070;--saffron:#eab53a;--terracotta:#b9502e;--border:#d9c9a6}
+*{box-sizing:border-box}html{min-height:100%;background:var(--paper)}body{margin:0;min-height:100vh;background:radial-gradient(rgb(28 33 70/.035) 1px,transparent 1px),var(--paper);background-size:3px 3px;color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif}a{text-decoration:none;color:inherit}
+header{height:64px;border-bottom:1px solid rgb(28 33 70/.08);display:flex;align-items:center}.wrap{width:min(1120px,100% - 40px);margin:auto}.brand{display:flex;align-items:center;gap:10px;font:600 22px "Fraunces",Georgia,serif}.badge{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--saffron);font:700 18px "Fraunces",Georgia,serif}.dot{color:var(--terracotta)}
+main{min-height:calc(100vh - 64px);display:grid;place-items:start center;padding:70px 20px 100px}.box{width:min(504px,100%)}.eyebrow{margin:0;color:var(--terracotta);font:500 11px "JetBrains Mono",monospace;letter-spacing:.2em;text-transform:uppercase}.title{margin:12px 0 10px;font:600 clamp(42px,7vw,56px)/1 "Fraunces",Georgia,serif}.desc{margin:0;color:rgb(28 33 70/.65);font-size:16px}.card{margin-top:32px;border:1px solid rgb(28 33 70/.15);border-radius:16px;background:var(--card);padding:24px}.label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgb(28 33 70/.72)}.field{display:block;width:100%;height:43px;border:1px solid var(--border);border-radius:9px;background:var(--card);padding:10px 14px;color:var(--ink);font:inherit;font-size:15px;outline:none}.field:focus{border-color:var(--ink);box-shadow:0 0 0 2px rgb(234 181 58/.5)}.row{margin-top:18px}.button{margin-top:20px;width:100%;height:44px;border:0;border-radius:999px;background:var(--ink);color:var(--paper);font-weight:700;cursor:pointer}.button:disabled{opacity:.55;cursor:not-allowed}.error{margin:14px 0 0;color:var(--terracotta);font-size:14px}.success{margin:14px 0 0;color:#4f6b4a;font-size:14px}footer{border-top:1px solid rgb(28 33 70/.08);padding:18px 0;color:rgb(28 33 70/.5);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="/umangsucopedia-v2/"><span class="badge">U</span><span>Ucopedia<span class="dot">.</span></span></a></div></header>
+<main><div class="box">
+<p class="eyebrow">Private area</p><h1 class="title">Owner login<span class="dot">.</span></h1><p class="desc">Sign in to write and manage your Ucopedia.</p>
+<form id="login" class="card" autocomplete="on">
+<label class="label" for="email">Email</label><input id="email" class="field" type="email" autocomplete="username" required>
+<div class="row"><label class="label" for="password">Password</label><input id="password" class="field" type="password" autocomplete="current-password" required></div>
+<p id="message" aria-live="polite"></p><button id="submit" class="button" type="submit">Sign in</button>
+</form></div></main>
+<footer>© 2026 Ucopedia. All thoughts my own.</footer>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase=createClient('https://tfcbvciksqnfocatgftd.supabase.co','sb_publishable_3EN2uLUWh79LTL3Sk5ReKQ_5PDFfcD-');
+const form=document.getElementById('login'), email=document.getElementById('email'), password=document.getElementById('password'), button=document.getElementById('submit'), message=document.getElementById('message');
+form.addEventListener('submit',async(e)=>{e.preventDefault();message.className='';message.textContent='Signing in…';button.disabled=true;try{const {data,error}=await supabase.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)throw error; if(!data.user)throw new Error('Login did not return a user.'); message.className='success';message.textContent='Login successful. Opening dashboard…';location.href='/umangsucopedia-v2/admin/';}catch(err){message.className='error';message.textContent=err?.message||'Unable to sign in.';button.disabled=false;}});
+</script>
+</body>
+</html>
