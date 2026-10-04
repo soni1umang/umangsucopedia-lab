@@ -24,24 +24,34 @@ export function buildNav(categories: Category[], photoAlbums: { slug: string; ti
   })
   return [
     { label: 'Home', to: '/' },
-    { label: 'About me', to: '/about' },
     {
-      label: 'Blogs',
+      label: 'Read',
       to: '/blogs',
-      children: categories.filter((c) => !c.parent_id).map(toItem),
+      children: [
+        { label: 'Essays', to: '/blogs', children: categories.filter((c) => !c.parent_id).map(toItem) },
+        { label: 'Questions', to: '/questions' },
+      ],
     },
     {
-      label: 'Academia',
+      label: 'Research',
       to: '/academia',
-      children: [{ label: 'Portfolio', to: '/academia/portfolio' }, { label: 'Publications', to: '/academia/publications' }],
+      children: [
+        { label: 'Overview', to: '/academia' },
+        { label: 'Publications', to: '/academia/publications' },
+        { label: 'Academic work', to: '/academia/portfolio' },
+      ],
     },
     {
-      label: 'Photography',
-      to: '/photography',
-      children: photoAlbums.map((a) => ({ label: a.title, to: `/photography/${a.slug}` })),
+      label: 'Make',
+      to: '/workbench',
+      children: [
+        { label: 'Workbench', to: '/workbench' },
+        { label: 'Photography', to: '/photography', children: photoAlbums.map((a) => ({ label: a.title, to: `/photography/${a.slug}` })) },
+        { label: 'Paints', to: '/paints' },
+      ],
     },
-    { label: 'Paints', to: '/paints' },
-    { label: 'Side Hustles', to: '/side-hustles' },
+    { label: 'Now', to: '/now' },
+    { label: 'About', to: '/about' },
     { label: 'Contact', to: '/contact' },
   ]
 }
