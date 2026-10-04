@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, Hammer, Image, Radio, Wrench } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { getContent, type WorkbenchItem } from '@/lib/content'
@@ -40,7 +41,7 @@ function Workbench() {
   </>
 }
 
-function ProjectGroup({ title, eyebrow, icon, items, archived=false }: { title: string; eyebrow: string; icon: React.ReactNode; items: WorkbenchItem[]; archived?: boolean }) {
+function ProjectGroup({ title, eyebrow, icon, items, archived=false }: { title: string; eyebrow: string; icon: ReactNode; items: WorkbenchItem[]; archived?: boolean }) {
   if (!items.length) return null
   return <section className={archived ? 'mt-16' : ''}>
     <div className="mb-7 flex items-end justify-between gap-4 border-b-2 border-ink pb-4"><div><p className="eyebrow inline-flex items-center gap-2">{icon}{eyebrow}</p><h2 className="mt-2 text-4xl font-semibold">{title}</h2></div><span className="font-mono text-xs uppercase tracking-[.18em] text-ink/35">{items.length} {items.length===1?'project':'projects'}</span></div>
