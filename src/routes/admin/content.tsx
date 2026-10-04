@@ -4,13 +4,13 @@ import { ArrowDown, ArrowUp, ImagePlus, Link2, Plus, Save, Trash2, RotateCcw, Ey
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings, type WorkbenchItem, type QuestionItem } from '@/lib/content'
-import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, workbench as fallbackWorkbench, questions as fallbackQuestions } from '@/config/site'
+import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, workbench as fallbackWorkbench, questions as fallbackQuestions, ucopediaHistory as fallbackHistory } from '@/config/site'
 
-type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'workbench' | 'questions' | 'photography' | 'paintings'
-const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', workbench:'Workbench', questions:'Questions', photography:'Photography', paintings:'Paints' }
+type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'workbench' | 'questions' | 'unpolished_beginner' | 'photography' | 'paintings'
+const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', workbench:'Workbench', questions:'Questions', unpolished_beginner:'Unpolished beginner', photography:'Photography', paintings:'Paints' }
 const defaultSiteSettings: SiteSettings = { ...site, socials: socials.map((s) => ({ ...s, enabled: s.key !== 'instagram2', icon: s.key === 'instagram2' ? 'instagram' : s.key as any })) }
 const publications: PublicationItem[] = []
-const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, workbench:fallbackWorkbench, questions:fallbackQuestions, photography:albums, paintings }
+const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, workbench:fallbackWorkbench, questions:fallbackQuestions, unpolished_beginner:fallbackHistory, photography:albums, paintings }
 const DRAFT_STORAGE_PREFIX = 'ucopedia-content-draft-v1:'
 function readBrowserDraft(userId:string): { updatedAt:number; drafts:Record<Key,unknown> } | null {
   try {
@@ -190,6 +190,7 @@ function ContentStudio() {
         {active==='publications' && <PublicationsEditor value={draft as PublicationItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='workbench' && <WorkbenchEditor value={draft as WorkbenchItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='questions' && <QuestionsEditor value={draft as QuestionItem[]} setValue={setDraft}/>} 
+        {active==='unpolished_beginner' && <HistoryEditor value={draft as WebsiteAttempt[]} setValue={setDraft}/>}
         {active==='photography' && <PhotographyEditor value={draft as Album[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='paintings' && <PaintingsEditor value={draft as Painting[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         <div className='mt-6 flex items-center justify-between rounded-2xl border border-ink/10 bg-card p-4'>
@@ -376,5 +377,33 @@ function PaintingsEditor({value,setValue,uploading,imageChange}:{value:Painting[
   function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
   return <Card title='Paints' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{src:'',title:'',medium:'',year:String(new Date().getFullYear()),caption:''}])}><Plus className='size-4'/> Add painting</button>}>
     <div className='grid gap-5 md:grid-cols-2'>{value.map((p,i)=><div key={i} className='rounded-2xl border border-ink/10 bg-paper p-5'><div className='mb-4 flex items-center justify-between gap-3'><h3 className='font-semibold'>{p.title||'Untitled painting'}</h3><ItemActions index={i} total={value.length} label='painting' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/></div><Field label='Image'><ImagePicker value={p.src} onChange={url=>update(i,{src:url})} uploading={uploading} imageChange={imageChange} id={'painting-'+i}/></Field><div className='mt-4 grid gap-4'><Field label='Title'><TextInput value={p.title} onChange={e=>update(i,{title:e.target.value})}/></Field><div className='grid gap-4 sm:grid-cols-2'><Field label='Medium'><TextInput value={p.medium} onChange={e=>update(i,{medium:e.target.value})}/></Field><Field label='Year'><TextInput value={p.year} onChange={e=>update(i,{year:e.target.value})}/></Field></div><Field label='Caption'><TextArea rows={3} value={p.caption} onChange={e=>update(i,{caption:e.target.value})}/></Field></div></div>)}</div>
+  </Card>
+}
+
+function HistoryEditor({value,setValue}:{value:WebsiteAttempt[];setValue:Dispatch<SetStateAction<unknown>>}) {
+  function update(i:number,p:Partial<WebsiteAttempt>){setValue(v=>(v as WebsiteAttempt[]).map((x,n)=>n===i?{...x,...p}:x))}
+  function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
+  return <Card title='Unpolished Beginner — website archaeology' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{title:'',platform:'',era:'',url:'',description:'',lesson:''}])}><Plus className='size-4'/> Add attempt</button>}>
+    <div className='mb-6 rounded-xl border border-saffron/40 bg-saffron/15 p-4 text-sm leading-relaxed text-ink/70'>
+      <strong className='text-ink'>This is the archive of your earlier internet selves.</strong> Keep the failed experiments, abandoned designs and old URLs. The order here is the order shown on the public page, so you can build a timeline from roughly 2016 onward without needing exact dates for every version.
+    </div>
+    <div className='space-y-6'>
+      {value.map((p,i)=><div key={i} className='rounded-2xl border-2 border-ink/10 bg-paper p-5 md:p-6'>
+        <div className='mb-5 flex items-start justify-between gap-3'>
+          <div><p className='font-mono text-[.6rem] uppercase tracking-widest text-terracotta'>Attempt {String(i+1).padStart(2,'0')}</p><h3 className='mt-1 font-display text-2xl font-semibold'>{p.title||'Untitled attempt'}</h3></div>
+          <ItemActions index={i} total={value.length} label='attempt' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/>
+        </div>
+        <div className='grid gap-4 md:grid-cols-3'>
+          <Field label='Title'><TextInput value={p.title} onChange={e=>update(i,{title:e.target.value})} placeholder='The first Ucopedia'/></Field>
+          <Field label='Platform'><TextInput value={p.platform} onChange={e=>update(i,{platform:e.target.value})} placeholder='Blogger, WordPress, Wix…'/></Field>
+          <Field label='Era / year'><TextInput value={p.era} onChange={e=>update(i,{era:e.target.value})} placeholder='≈ 2016, 2019, Later…'/></Field>
+        </div>
+        <div className='mt-4'><Field label='URL'><TextInput value={p.url} onChange={e=>update(i,{url:e.target.value})} placeholder='https://…'/></Field></div>
+        <div className='mt-4 grid gap-4 md:grid-cols-2'>
+          <Field label='What was this attempt?'><TextArea rows={5} value={p.description} onChange={e=>update(i,{description:e.target.value})} placeholder='What were you trying to build?'/></Field>
+          <Field label='What did it teach you?'><TextArea rows={5} value={p.lesson} onChange={e=>update(i,{lesson:e.target.value})} placeholder='What did you learn from this version?'/></Field>
+        </div>
+      </div>)}
+    </div>
   </Card>
 }
