@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import React from 'react'
 import { ChevronRight } from 'lucide-react'
 import { categories, posts } from '@/data/blog'
@@ -26,6 +26,11 @@ function ancestors(all: any[], category: any) {
 }
 
 export const Route = createFileRoute('/blogs/$category')({
+  beforeLoad: ({ params }) => {
+    if (params.category === 'entangled-minds') {
+      throw redirect({ href: 'https://entangledminds0.wordpress.com/' })
+    }
+  },
   component: Category,
 })
 
