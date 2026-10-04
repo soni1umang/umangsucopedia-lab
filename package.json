@@ -1,0 +1,35 @@
+{
+  "name": "umangsucopedia-v2",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "@tanstack/react-router": "latest",
+    "lucide-react": "latest",
+    "marked": "18.0.14",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "latest",
+    "clsx": "latest",
+    "tailwind-merge": "latest",
+    "dompurify": "3.4.16"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "latest",
+    "@vitejs/plugin-react": "latest",
+    "@tailwindcss/vite": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vite-tsconfig-paths": "latest",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "tailwindcss-animate": "latest"
+  }
+}
