@@ -4,8 +4,8 @@ import { posts, categories } from '@/data/blog'
 import { PostCard } from '@/components/PostCard'
 import { CategoryCard } from '@/components/CategoryCard'
 import { SocialLinks } from '@/components/SocialIcons'
-import { about, albums, paintings, site, now as fallbackNow, workbench as fallbackWorkbench } from '@/config/site'
-import { getContent, type AboutContent, type Album, type Painting, type NowItem, type WorkbenchItem } from '@/lib/content'
+import { about, albums, paintings, site, workbench as fallbackWorkbench } from '@/config/site'
+import { getContent, type AboutContent, type Album, type Painting, type WorkbenchItem } from '@/lib/content'
 import { useSiteSettings } from '@/lib/site-context'
 import { img } from '@/lib/img'
 import { ResearchConstellation } from '@/components/ResearchConstellation'
@@ -17,10 +17,9 @@ export const Route = createFileRoute('/')({
       getContent<AboutContent>('about', about),
       getContent<Album[]>('photography', albums),
       getContent<Painting[]>('paintings', paintings),
-      getContent<NowItem[]>('now', fallbackNow),
       getContent<WorkbenchItem[]>('workbench', fallbackWorkbench),
     ])
-    return { allPosts: latest, latest: latest.slice(0, 5), categories: cs, about: aboutData, albums: photoData, paintings: paintData, now: nowData, workbench: workbenchData }
+    return { allPosts: latest, latest: latest.slice(0, 5), categories: cs, about: aboutData, albums: photoData, paintings: paintData, workbench: workbenchData }
   },
   component: Home,
 })
@@ -34,9 +33,9 @@ function SignalTrace() {
 
 function Home() {
   const settings = useSiteSettings()
-  const { allPosts, latest, categories, about: aboutData, albums, paintings: paintData, now: nowItems, workbench } = Route.useLoaderData()
+  const { allPosts, latest, categories, about: aboutData, albums, paintings: paintData, workbench } = Route.useLoaderData()
   const [featured, ...rest] = latest
-  const activeNow = nowItems.slice(0, 3)
+  const activeNow = workbench.filter(item => item.show_on_now && ['active','ongoing','in progress','experiment','learning'].includes((item.status || '').toLowerCase())).slice(0, 3)
   const featuredBench = workbench.filter(w => w.featured).slice(0, 2)
 
   return <>
@@ -105,9 +104,9 @@ function Home() {
         </div>
         <div className="grid gap-3">
           {activeNow.map((item,i)=><div key={item.title+i} className="research-card group rounded-2xl border border-ink/10 bg-card p-5">
-            <div className="flex items-center gap-3"><span className="font-mono text-[.6rem] tracking-[.18em] text-terracotta">{item.label}</span><span className="h-px flex-1 bg-ink/10"/><span className="font-mono text-[.55rem] uppercase tracking-widest text-ink/30">{item.status}</span></div>
+            <div className="flex items-center gap-3"><span className="font-mono text-[.6rem] tracking-[.18em] text-terracotta">{item.kind}</span><span className="h-px flex-1 bg-ink/10"/><span className="font-mono text-[.55rem] uppercase tracking-widest text-ink/30">{item.status}</span></div>
             <h3 className="mt-3 font-display text-2xl font-semibold">{item.title}</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60">{item.detail}</p>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60">{item.goal || item.description}</p>
           </div>)}
         </div>
       </div>
