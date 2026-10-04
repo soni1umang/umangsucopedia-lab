@@ -1,0 +1,3 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540">
+<defs><pattern id="g" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#f5ecd9" stroke-opacity=".08"/></pattern></defs>
+<rect width="800" height="540" fill="#ecdfc3"/><rect width="800" height="540" fill="url(#g)"/><path d="M92 95h616" stroke="#1c2146" stroke-width="8"/><path d="M120 95v315M680 95v315" stroke="#b9502e" stroke-width="18"/><path d="M155 110q110 72 160 0v300H155Zm490 0q-110 72-160 0v300h160Z" fill="#b9502e" opacity=".75"/><circle cx="400" cy="325" r="35" fill="#eab53a"/><path d="M320 415h160" stroke="#1c2146" stroke-width="8"/><text x="34" y="500" font-family="Georgia,serif" font-size="24" fill="#1c2146">cinema / drama</text></svg>
