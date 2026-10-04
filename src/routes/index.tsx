@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowRight, Atom, BookOpen, Camera, FlaskConical, Brain, Hammer, Map, Paintbrush, Radio, Sparkles } from 'lucide-react'
-import { posts, categories } from '@/data/blog'
+import { posts, categories, categoryPostCount } from '@/data/blog'
 import { PostCard } from '@/components/PostCard'
 import { CategoryCard } from '@/components/CategoryCard'
 import { SocialLinks } from '@/components/SocialIcons'
@@ -153,7 +153,7 @@ function Home() {
         <div><p className="eyebrow">Read by subject</p><h2 className="mt-2 text-4xl font-semibold md:text-5xl">The shelves.</h2><p className="mt-3 max-w-xl text-ink/60">Different subjects. Same curiosity. Pick a shelf and disappear into it for a while.</p></div>
         <Link to="/blogs" className="hidden text-sm font-semibold hover:text-terracotta sm:inline-flex">Browse all essays <ArrowRight className="ml-1 size-4"/></Link>
       </div>
-      <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{categories.filter((c:any)=>!c.parent_id).slice(0,8).map((c:any,i:number)=><CategoryCard key={c.id} slug={c.slug} name={c.name} description={c.description} coverImage={c.cover_image} postCount={allPosts.filter((p:any)=>p.category_id===c.id).length} index={i}/>)}</div>
+      <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{categories.filter((c:any)=>!c.parent_id).slice(0,8).map((c:any,i:number)=><CategoryCard key={c.id} slug={c.slug} name={c.name} description={c.description} coverImage={c.cover_image} postCount={categoryPostCount(categories, allPosts, c.id)} index={i}/>)}</div>
     </section>
 
     <section className="container-uco pt-24">
