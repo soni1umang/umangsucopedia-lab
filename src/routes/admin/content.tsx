@@ -3,14 +3,14 @@ import { useEffect, useMemo, useState, type ReactNode, type Dispatch, type SetSt
 import { ArrowDown, ArrowUp, ImagePlus, Link2, Plus, Save, Trash2, RotateCcw, Eye, Sparkles, ExternalLink, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
-import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings } from '@/lib/content'
-import { about, academia, albums, paintings, portfolio, sideHustles, site, socials } from '@/config/site'
+import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings, type NowItem, type WorkbenchItem, type QuestionItem } from '@/lib/content'
+import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, now as fallbackNow, workbench as fallbackWorkbench, questions as fallbackQuestions } from '@/config/site'
 
-type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'side_hustles' | 'photography' | 'paintings'
-const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', side_hustles:'Other projects', photography:'Photography', paintings:'Paints' }
+type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'workbench' | 'now' | 'questions' | 'photography' | 'paintings'
+const labels: Record<Key,string> = { site_settings:'Site settings', about:'About me', academia:'Academia', portfolio:'Academic work', publications:'Publications', workbench:'Workbench', now:'Now', questions:'Questions', photography:'Photography', paintings:'Paints' }
 const defaultSiteSettings: SiteSettings = { ...site, socials: socials.map((s) => ({ ...s, enabled: s.key !== 'instagram2', icon: s.key === 'instagram2' ? 'instagram' : s.key as any })) }
 const publications: PublicationItem[] = []
-const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, side_hustles:sideHustles, photography:albums, paintings }
+const defaults: Record<Key,unknown> = { site_settings:defaultSiteSettings, about, academia, portfolio, publications, workbench:fallbackWorkbench, now:fallbackNow, questions:fallbackQuestions, photography:albums, paintings }
 const DRAFT_STORAGE_PREFIX = 'ucopedia-content-draft-v1:'
 function readBrowserDraft(userId:string): { updatedAt:number; drafts:Record<Key,unknown> } | null {
   try {
@@ -188,7 +188,9 @@ function ContentStudio() {
         {active==='academia' && <AcademiaEditor value={draft as AcademiaContent} setValue={setDraft}/>} 
         {active==='portfolio' && <PortfolioEditor value={draft as PortfolioItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='publications' && <PublicationsEditor value={draft as PublicationItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
-        {active==='side_hustles' && <SideHustlesEditor value={draft as SideHustleItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
+        {active==='workbench' && <WorkbenchEditor value={draft as WorkbenchItem[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
+        {active==='now' && <NowEditor value={draft as NowItem[]} setValue={setDraft}/>} 
+        {active==='questions' && <QuestionsEditor value={draft as QuestionItem[]} setValue={setDraft}/>} 
         {active==='photography' && <PhotographyEditor value={draft as Album[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         {active==='paintings' && <PaintingsEditor value={draft as Painting[]} setValue={setDraft} uploading={uploading} imageChange={imageChange}/>} 
         <div className='mt-6 flex items-center justify-between rounded-2xl border border-ink/10 bg-card p-4'>
@@ -331,6 +333,40 @@ function SideHustlesEditor({value,setValue,uploading,imageChange}:{value:SideHus
 
 function ImagePicker({value,onChange,uploading,imageChange,id}:{value:string;onChange:(v:string)=>void;uploading:string|null;imageChange:(file:File,onDone:(url:string)=>void,id:string)=>Promise<void>;id:string}) {
   return <div><div className='flex flex-wrap items-center gap-3'><label className='btn-ghost cursor-pointer'><ImagePlus className='size-4'/>{uploading===id?'Uploading…':'Upload image'}<input type='file' accept='image/*' className='sr-only' onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void imageChange(f,onChange,id)}} disabled={uploading!==null}/></label>{value && <a href={value} target='_blank' rel='noreferrer' className='text-xs text-terracotta hover:underline'>Open image ↗</a>}</div>{value && <img src={value} alt='' className='mt-3 aspect-[3/2] max-h-56 w-full rounded-xl border border-ink/10 bg-paper object-cover'/>}</div>
+}
+
+function WorkbenchEditor({value,setValue,uploading,imageChange}:{value:WorkbenchItem[];setValue:Dispatch<SetStateAction<unknown>>;uploading:string|null;imageChange:(file:File,onDone:(url:string)=>void,id:string)=>Promise<void>}) {
+  function update(i:number,p:Partial<WorkbenchItem>){setValue(v=>(v as WorkbenchItem[]).map((x,n)=>n===i?{...x,...p}:x))}
+  function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
+  return <Card title='Workbench entries' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{title:'',kind:'Experiment',status:'Idea',goal:'',description:'',learning:'',next:'',link:'',images:[],featured:false}])}><Plus className='size-4'/> Add entry</button>}>
+    <p className='mb-5 text-sm text-ink/55'>Document things you build, test, repair or learn from. Each entry can carry field photos.</p>
+    <div className='space-y-6'>{value.map((p,i)=><div key={i} className='rounded-2xl border-2 border-ink/10 bg-paper p-5'><div className='mb-5 flex items-center justify-between gap-3'><div><p className='font-mono text-[.6rem] uppercase tracking-widest text-terracotta'>Bench {String(i+1).padStart(2,'0')}</p><h3 className='font-display text-2xl font-semibold'>{p.title||'Untitled experiment'}</h3></div><ItemActions index={i} total={value.length} label='workbench entry' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/></div>
+      <div className='grid gap-4 md:grid-cols-[1.4fr_1fr_8rem]'><Field label='Title'><TextInput value={p.title} onChange={e=>update(i,{title:e.target.value})}/></Field><Field label='Kind'><TextInput value={p.kind} onChange={e=>update(i,{kind:e.target.value})} placeholder='Research, electronics, art…'/></Field><Field label='Status'><TextInput value={p.status} onChange={e=>update(i,{status:e.target.value})}/></Field></div>
+      <div className='mt-4'><Field label='Goal'><TextInput value={p.goal} onChange={e=>update(i,{goal:e.target.value})}/></Field></div>
+      <div className='mt-4 grid gap-4 md:grid-cols-2'><Field label='What happened'><TextArea rows={5} value={p.description} onChange={e=>update(i,{description:e.target.value})}/></Field><Field label='What I learned'><TextArea rows={5} value={p.learning} onChange={e=>update(i,{learning:e.target.value})}/></Field></div>
+      <div className='mt-4 grid gap-4 md:grid-cols-2'><Field label='What happens next'><TextArea rows={3} value={p.next} onChange={e=>update(i,{next:e.target.value})}/></Field><Field label='Project link'><TextInput value={p.link} onChange={e=>update(i,{link:e.target.value})} placeholder='Optional'/></Field></div>
+      <div className='mt-5 rounded-xl border border-ink/10 bg-card p-4'><div className='mb-3 flex items-center justify-between'><div><h4 className='font-semibold'>Field notes / images</h4><p className='text-xs text-ink/50'>Add as many progress pictures as you like.</p></div><button type='button' className='btn-ghost !px-3 !py-2 text-sm' onClick={()=>update(i,{images:[...(p.images??[]),'']})}><Plus className='size-4'/> Add picture</button></div><div className='space-y-3'>{(p.images??[]).map((src,j)=><div key={j} className='rounded-xl border border-ink/10 bg-paper p-3'><div className='mb-2 flex justify-end'><button type='button' className='text-xs text-terracotta' onClick={()=>update(i,{images:(p.images??[]).filter((_,n)=>n!==j)})}>Remove</button></div><ImagePicker value={src} onChange={url=>update(i,{images:(p.images??[]).map((x,n)=>n===j?url:x)})} uploading={uploading} imageChange={imageChange} id={'bench-'+i+'-'+j}/></div>)}</div></div>
+      <label className='mt-4 flex items-center gap-2 text-sm font-medium'><input type='checkbox' checked={!!p.featured} onChange={e=>update(i,{featured:e.target.checked})}/> Feature on the homepage</label>
+    </div>)}</div>
+  </Card>
+}
+
+function NowEditor({value,setValue}:{value:NowItem[];setValue:Dispatch<SetStateAction<unknown>>}) {
+  function update(i:number,p:Partial<NowItem>){setValue(v=>(v as NowItem[]).map((x,n)=>n===i?{...x,...p}:x))}
+  function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
+  return <Card title='Now — live notebook' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{label:'DOING',title:'',detail:'',status:'Active',href:''}])}><Plus className='size-4'/> Add signal</button>}>
+    <p className='mb-5 text-sm text-ink/55'>A small window into what is occupying your attention right now. Keep it temporary and honest.</p>
+    <div className='space-y-4'>{value.map((p,i)=><div key={i} className='rounded-2xl border border-ink/10 bg-paper p-5'><div className='mb-4 flex justify-between gap-3'><div><p className='font-mono text-[.6rem] uppercase tracking-widest text-terracotta'>Signal {String(i+1).padStart(2,'0')}</p><h3 className='font-display text-2xl font-semibold'>{p.title||'Untitled'}</h3></div><ItemActions index={i} total={value.length} label='Now signal' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/></div><div className='grid gap-4 md:grid-cols-3'><Field label='Label'><TextInput value={p.label} onChange={e=>update(i,{label:e.target.value})}/></Field><Field label='Title'><TextInput value={p.title} onChange={e=>update(i,{title:e.target.value})}/></Field><Field label='Status'><TextInput value={p.status} onChange={e=>update(i,{status:e.target.value})}/></Field></div><div className='mt-4'><Field label='Detail'><TextArea rows={4} value={p.detail} onChange={e=>update(i,{detail:e.target.value})}/></Field></div><div className='mt-4'><Field label='Optional link'><TextInput value={p.href??''} onChange={e=>update(i,{href:e.target.value})} placeholder='https://…'/></Field></div></div>)}</div>
+  </Card>
+}
+
+function QuestionsEditor({value,setValue}:{value:QuestionItem[];setValue:Dispatch<SetStateAction<unknown>>}) {
+  function update(i:number,p:Partial<QuestionItem>){setValue(v=>(v as QuestionItem[]).map((x,n)=>n===i?{...x,...p}:x))}
+  function move(i:number,d:number){const a=[...value],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setValue(a)}
+  return <Card title='Questions — unfinished thinking' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={()=>setValue([...value,{question:'',note:'',href:'',tags:[]}])}><Plus className='size-4'/> Add question</button>}>
+    <p className='mb-5 text-sm text-ink/55'>Questions can stay open. Link one to an essay later when it becomes a proper investigation.</p>
+    <div className='space-y-4'>{value.map((p,i)=><div key={i} className='rounded-2xl border border-ink/10 bg-paper p-5'><div className='mb-4 flex justify-between gap-3'><p className='font-mono text-[.6rem] uppercase tracking-widest text-terracotta'>Question {String(i+1).padStart(2,'0')}</p><ItemActions index={i} total={value.length} label='question' onUp={()=>move(i,-1)} onDown={()=>move(i,1)} onDelete={()=>setValue(value.filter((_,n)=>n!==i))}/></div><Field label='Question'><TextArea rows={3} value={p.question} onChange={e=>update(i,{question:e.target.value})}/></Field><div className='mt-4'><Field label='Note'><TextArea rows={3} value={p.note} onChange={e=>update(i,{note:e.target.value})}/></Field></div><div className='mt-4 grid gap-4 md:grid-cols-2'><Field label='Link to related work'><TextInput value={p.href??''} onChange={e=>update(i,{href:e.target.value})} placeholder='Optional'/></Field><Field label='Tags (comma separated)'><TextInput value={(p.tags??[]).join(', ')} onChange={e=>update(i,{tags:e.target.value.split(',').map(x=>x.trim()).filter(Boolean)})}/></Field></div></div>)}</div>
+  </Card>
 }
 
 function PhotographyEditor({value,setValue,uploading,imageChange}:{value:Album[];setValue:React.Dispatch<React.SetStateAction<unknown>>;uploading:string|null;imageChange:(file:File,onDone:(url:string)=>void,id:string)=>Promise<void>}) {
