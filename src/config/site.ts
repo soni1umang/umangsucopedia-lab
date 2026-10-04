@@ -146,8 +146,8 @@ export const now: import('@/lib/content').NowItem[] = [
 ]
 
 export const workbench: import('@/lib/content').WorkbenchItem[] = [
-  { title: 'Room automation', kind: 'Electronics', status: 'Experiment', goal: 'Make a room quietly intelligent.', description: 'Arduino, relays, sensors and the little systems that make everyday life easier.', learning: 'Designing things for humans is harder than making them switch on.', next: 'Build the first reliable control panel.', link: '', images: [], featured: true },
-  { title: 'RF readout bench', kind: 'Research', status: 'Active', goal: 'Turn tiny charge changes into a clean electrical signal.', description: 'Lumped resonators, matching networks, QPCs and a lot of careful debugging.', learning: 'The measurement chain is part of the experiment.', next: 'Tighten the matching and noise budget.', link: '', images: [], featured: true },
+  { title: 'Room automation', kind: 'Electronics', status: 'Active', goal: 'Make a room quietly intelligent.', description: 'Arduino, relays, sensors and the little systems that make everyday life easier.', learning: 'Designing things for humans is harder than making them switch on.', next: 'Build the first reliable control panel.', link: '', images: [], featured: true, show_on_now: true },
+  { title: 'RF readout bench', kind: 'Research', status: 'Active', goal: 'Turn tiny charge changes into a clean electrical signal.', description: 'Lumped resonators, matching networks, QPCs and a lot of careful debugging.', learning: 'The measurement chain is part of the experiment.', next: 'Tighten the matching and noise budget.', link: '', images: [], featured: true, show_on_now: true },
 ]
 
 export const questions: import('@/lib/content').QuestionItem[] = [
