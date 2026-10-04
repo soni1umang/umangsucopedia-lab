@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { academia, publications as fallbackPublications, site } from '@/config/site'
 import { getContent, type AcademiaContent, type PublicationItem } from '@/lib/content'
 import { useSiteSettings } from '@/lib/site-context'
+import { ResearchConstellation } from '@/components/ResearchConstellation'
 
 export const Route = createFileRoute('/academia/')({
   loader: async () => {
@@ -26,7 +27,7 @@ function Academia() {
       <PageHeader eyebrow="Academia" title={<>Learning, <span className="italic text-terracotta">formally</span>.</>}>
         {data.intro}
       </PageHeader>
-      <section className="container-uco grid gap-10 md:grid-cols-[1.5fr_1fr]">
+      <section className="container-uco grid gap-10 md:grid-cols-[1.35fr_.65fr]">
         <div>
           <h2 className="text-2xl font-semibold">Education</h2>
           <ol className="relative mt-6 space-y-8 border-l-2 border-dashed border-ink/20 pl-8">
@@ -42,12 +43,12 @@ function Academia() {
           </ol>
         </div>
         <aside className="space-y-6">
-          <div className="rounded-2xl border border-ink/10 bg-card p-6">
-            <h2 className="text-xl font-semibold">Research interests</h2>
-            <ul className="mt-4 space-y-2 text-ink/75">
-              {data.interests.map((i) => <li key={i} className="flex gap-2"><span className="text-terracotta">✦</span>{i}</li>)}
-            </ul>
+          <div>
+            <p className="eyebrow">Signal map</p>
+            <h2 className="mt-2 text-3xl font-semibold">Research is a network.</h2>
+            <p className="mt-3 text-sm leading-relaxed text-ink/60">The subjects change. The curiosity connecting them is the constant.</p>
           </div>
+          <ResearchConstellation interests={data.interests}/>
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]">
             <Link to="/academia/portfolio" className="group flex min-h-32 min-w-0 items-center justify-between gap-3 rounded-2xl border-2 border-ink bg-saffron p-4 transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] sm:p-5">
               <span className="min-w-0"><span className="block font-sans text-[clamp(1rem,1.7vw,1.35rem)] font-semibold leading-tight">Academic work</span><span className="mt-1 block text-[clamp(.72rem,1vw,.85rem)] leading-snug text-ink/75">Projects, talks, awards &amp; more</span></span>
