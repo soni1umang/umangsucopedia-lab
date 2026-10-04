@@ -1,0 +1,38 @@
+name: Clone stable Ucopedia v2 baseline
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Lab
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Copy stable v2
+        run: |
+          rm -rf ./*
+          rm -rf .[^.]* 2>/dev/null || true
+          git clone --depth 1 https://github.com/soni1umang/umangsucopedia-v2.git /tmp/ucopedia-v2
+          cp -a /tmp/ucopedia-v2/. .
+          rm -rf .git
+
+      - name: Re-create git metadata
+        env:
+          GITHUB_TOKEN: ${GITHUB_TOKEN}
+        run: |
+          git init
+          git checkout -B main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Clone stable Ucopedia v2 baseline"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin main --force
