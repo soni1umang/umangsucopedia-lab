@@ -13,6 +13,7 @@ export type Category = { id:number; slug:string; name:string; description?:strin
 export type NavItem = {
   label: string
   to: string
+  href?: string
   children?: NavItem[]
 }
 
@@ -20,6 +21,7 @@ export function buildNav(categories: Category[], photoAlbums: { slug: string; ti
   const toItem = (c: Category): NavItem => ({
     label: c.name,
     to: `/blogs/${c.slug}`,
+    ...(c.slug === 'entangled-minds' ? { href: 'https://entangledminds0.wordpress.com/' } : {}),
     children: categories.filter((k) => k.parent_id === c.id).map(toItem),
   })
   return [
@@ -70,14 +72,26 @@ function Flyout({ items, depth = 0 }: { items: NavItem[]; depth?: number }) {
     >
       {items.map((item) => (
         <li key={item.to} className="group/sub relative">
-          <Link
-            to={item.to}
-            className="flex items-center justify-between gap-4 rounded-lg px-3 py-2 text-sm text-ink/80 transition hover:bg-paper-deep hover:text-ink"
-            activeProps={{ className: 'bg-paper-deep text-ink font-medium' }}
-          >
-            {item.label}
-            {item.children?.length ? <ChevronRight className="size-3.5 opacity-60" /> : null}
-          </Link>
+          {item.href ? (
+            <a
+              href={item.href}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-between gap-4 rounded-lg px-3 py-2 text-sm text-ink/80 transition hover:bg-paper-deep hover:text-ink"
+            >
+              {item.label}
+              <ChevronRight className="size-3.5 opacity-60" />
+            </a>
+          ) : (
+            <Link
+              to={item.to}
+              className="flex items-center justify-between gap-4 rounded-lg px-3 py-2 text-sm text-ink/80 transition hover:bg-paper-deep hover:text-ink"
+              activeProps={{ className: 'bg-paper-deep text-ink font-medium' }}
+            >
+              {item.label}
+              {item.children?.length ? <ChevronRight className="size-3.5 opacity-60" /> : null}
+            </Link>
+          )}
           {item.children?.length ? (
             <div className="invisible absolute left-full top-0 z-50 pl-2 opacity-0 transition group-hover/sub:visible group-hover/sub:opacity-100 group-focus-within/sub:visible group-focus-within/sub:opacity-100">
               <Flyout items={item.children} depth={depth + 1} />
@@ -95,15 +109,21 @@ function MobileItem({ item, onNavigate }: { item: NavItem; onNavigate: () => voi
   return (
     <li>
       <div className="flex items-center">
-        <Link
-          to={item.to}
-          onClick={onNavigate}
-          className="flex-1 py-2.5 text-ink/85"
-          activeOptions={{ exact: true }}
-          activeProps={{ className: 'font-semibold text-terracotta' }}
-        >
-          {item.label}
-        </Link>
+        {item.href ? (
+          <a href={item.href} target="_blank" rel="noreferrer" onClick={onNavigate} className="flex-1 py-2.5 text-ink/85">
+            {item.label}
+          </a>
+        ) : (
+          <Link
+            to={item.to}
+            onClick={onNavigate}
+            className="flex-1 py-2.5 text-ink/85"
+            activeOptions={{ exact: true }}
+            activeProps={{ className: 'font-semibold text-terracotta' }}
+          >
+            {item.label}
+          </Link>
+        )}
         {hasChildren && (
           <button
             type="button"
