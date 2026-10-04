@@ -142,7 +142,7 @@ function LinkedInUpdates({ items }: { items: LinkedInPost[] }) {
       </div>
       <div className="mt-5 sm:hidden">
         <a href="https://www.linkedin.com/in/umang-soni420/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-terracotta">
-          <Linkedin className="size-4" /> View profile <ExternalLink className="size-3.5" />
+          <SocialIcon name="linkedin" className="size-4" /> View profile <ExternalLink className="size-3.5" />
         </a>
       </div>
     </section>
