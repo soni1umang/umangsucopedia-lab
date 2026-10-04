@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type ReactNode, type Dispatch, type SetSt
 import { ArrowDown, ArrowUp, ImagePlus, Link2, Plus, Save, Trash2, RotateCcw, Eye, Sparkles, ExternalLink, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
-import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings, type WorkbenchItem, type QuestionItem } from '@/lib/content'
+import { getContent, saveContent, type AboutContent, type AcademiaContent, type Album, type Painting, type PortfolioItem, type PublicationItem, type SideHustleItem, type SiteSettings, type WorkbenchItem, type QuestionItem, type LinkedInPost } from '@/lib/content'
 import { about, academia, albums, paintings, portfolio, sideHustles, site, socials, workbench as fallbackWorkbench, questions as fallbackQuestions, ucopediaHistory as fallbackHistory, linkedinPosts as fallbackLinkedInPosts } from '@/config/site'
 
 type Key = 'site_settings' | 'about' | 'academia' | 'portfolio' | 'publications' | 'linkedin_posts' | 'workbench' | 'questions' | 'unpolished_beginner' | 'photography' | 'paintings'
