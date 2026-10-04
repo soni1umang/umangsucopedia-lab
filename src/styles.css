@@ -238,3 +238,105 @@
   .house-cat-walking .cat-leg-a,.house-cat-walking .cat-leg-b,.house-cat-walking .house-cat-svg,.house-cat-sit .house-cat-svg,.house-cat-look .house-cat-svg,.house-cat-sleep .house-cat-svg,.house-cat-run .house-cat-svg,.cat-message,.cat-trails span{animation:none!important}
   .house-cat{transition-duration:0ms!important}
 }
+
+
+/* House-cat finishing details: recognizable tabby markings, slower movement, little life. */
+.house-cat {
+  width: 132px;
+  bottom: 12px;
+  transition-timing-function: cubic-bezier(.37,0,.63,1);
+}
+.cat-body {
+  fill: var(--color-paper);
+  stroke: var(--color-ink);
+  stroke-width: 2.8;
+}
+.cat-tail {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cat-stripe {
+  fill: none;
+  stroke: var(--color-terracotta);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: .9;
+}
+.cat-eye {
+  fill: var(--color-leaf);
+  stroke: var(--color-ink);
+  stroke-width: 1.4;
+}
+.cat-pupil {
+  fill: var(--color-ink);
+  stroke: none;
+}
+.cat-nose {
+  fill: var(--color-terracotta);
+  stroke: var(--color-ink);
+  stroke-width: 1;
+}
+.cat-paw {
+  stroke: var(--color-ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.cat-legs-a {
+  animation: catWalkA .8s ease-in-out infinite alternate;
+  transform-origin: 80px 64px;
+}
+.cat-legs-b {
+  animation: catWalkB .8s ease-in-out infinite alternate;
+  transform-origin: 91px 64px;
+}
+.cat-line .cat-tail {
+  animation: catTail .95s ease-in-out infinite alternate;
+  transform-origin: 126px 58px;
+}
+.house-cat-sit .cat-tail,
+.house-cat-look .cat-tail {
+  animation-duration: 2.8s;
+}
+.house-cat-sleep .cat-tail {
+  animation: none;
+}
+.house-cat-sleep .cat-body {
+  fill: var(--color-paper-deep);
+}
+.house-cat-look .cat-eye {
+  animation: catBlink 4.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.house-cat-run .cat-tail {
+  animation-duration: .25s;
+}
+@keyframes catWalkA {
+  from { transform: rotate(10deg); }
+  to { transform: rotate(-12deg); }
+}
+@keyframes catWalkB {
+  from { transform: rotate(-12deg); }
+  to { transform: rotate(10deg); }
+}
+@keyframes catTail {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(5deg); }
+}
+@keyframes catBlink {
+  0%, 43%, 46%, 100% { transform: scaleY(1); }
+  44%, 45% { transform: scaleY(.08); }
+}
+.house-cat:hover .cat-ear {
+  transform: translateY(-1px);
+}
+.house-cat-run { transition-timing-function: cubic-bezier(.7,0,.25,1); }
+@media (max-width: 640px) {
+  .house-cat { width: 98px; bottom: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cat-legs-a,.cat-legs-b,.cat-line .cat-tail,.house-cat-look .cat-eye { animation: none !important; }
+}
