@@ -163,6 +163,8 @@ export const ucopediaHistory: import('@/lib/content').WebsiteAttempt[] = [
   },
 ]
 
+export const linkedinPosts: import('@/lib/content').LinkedInPost[] = []
+
 export const publications: import('@/lib/content').PublicationItem[] = []
 
 export const now: import('@/lib/content').NowItem[] = [
