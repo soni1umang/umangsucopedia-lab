@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Owner login · Ucopedia</title>
+<link rel="icon" href="/umangsucopedia-lab/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -14,7 +15,7 @@ main{min-height:calc(100vh - 64px);display:grid;place-items:start center;padding
 </style>
 </head>
 <body>
-<header><div class="wrap"><a class="brand" href="/umangsucopedia-v2/"><span class="badge">U</span><span>Ucopedia<span class="dot">.</span></span></a></div></header>
+<header><div class="wrap"><a class="brand" href="/umangsucopedia-lab/"><span class="badge">U</span><span>Ucopedia<span class="dot">.</span></span></a></div></header>
 <main><div class="box">
 <p class="eyebrow">Private area</p><h1 class="title">Owner login<span class="dot">.</span></h1><p class="desc">Sign in to write and manage your Ucopedia.</p>
 <form id="login" class="card" autocomplete="on">
@@ -27,7 +28,7 @@ main{min-height:calc(100vh - 64px);display:grid;place-items:start center;padding
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const supabase=createClient('https://tfcbvciksqnfocatgftd.supabase.co','sb_publishable_3EN2uLUWh79LTL3Sk5ReKQ_5PDFfcD-');
 const form=document.getElementById('login'), email=document.getElementById('email'), password=document.getElementById('password'), button=document.getElementById('submit'), message=document.getElementById('message');
-form.addEventListener('submit',async(e)=>{e.preventDefault();message.className='';message.textContent='Signing in…';button.disabled=true;try{const {data,error}=await supabase.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)throw error; if(!data.user)throw new Error('Login did not return a user.'); message.className='success';message.textContent='Login successful. Opening dashboard…';location.href='/umangsucopedia-v2/admin/';}catch(err){message.className='error';message.textContent=err?.message||'Unable to sign in.';button.disabled=false;}});
+form.addEventListener('submit',async(e)=>{e.preventDefault();message.className='';message.textContent='Signing in…';button.disabled=true;try{const {data,error}=await supabase.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)throw error; if(!data.user)throw new Error('Login did not return a user.'); message.className='success';message.textContent='Login successful. Opening dashboard…';location.href='/umangsucopedia-lab/admin/';}catch(err){message.className='error';message.textContent=err?.message||'Unable to sign in.';button.disabled=false;}});
 </script>
 </body>
 </html>
