@@ -34,6 +34,16 @@ export type SideHustleItem = {
   images?: string[]
 }
 
+export type WebsiteAttempt = {
+  title: string
+  platform: string
+  era: string
+  url: string
+  description: string
+  lesson: string
+  image?: string
+}
+
 export type NowItem = {
   label: string
   title: string
