@@ -28,8 +28,9 @@ function roomFor(pathname: string): Room {
   return ROOMS.hallway
 }
 
-const WALK_SRC = '/cat/cat-walk-alpha.apng'
-const IDLE_SRC = '/cat/cat-idle.png'
+const ASSET_BASE = import.meta.env.BASE_URL
+const WALK_SRC = `${ASSET_BASE}cat/cat-walk-alpha.apng`
+const IDLE_SRC = `${ASSET_BASE}cat/cat-idle.png`
 
 function randomBetween(min: number, max: number) {
   return min + Math.random() * (max - min)
