@@ -206,20 +206,21 @@
 
 
 
-/* The resident cat: now a larger photographic tabby with slow, relaxed behaviour. */
+/* The resident cat: a real animated cat, composited on transparency. */
 .house-cat-layer {
   position: fixed;
   inset: auto 0 0;
   z-index: 30;
-  height: 152px;
+  height: 158px;
   pointer-events: none;
   overflow: visible;
 }
+
 .house-cat {
   position: absolute;
-  bottom: 7px;
-  width: 190px;
-  height: 145px;
+  bottom: 4px;
+  width: 240px;
+  height: 150px;
   border: 0;
   padding: 0;
   margin: 0;
@@ -229,22 +230,26 @@
   pointer-events: auto;
   transition-property: left;
   transition-timing-function: cubic-bezier(.37,0,.63,1);
-  filter: drop-shadow(0 12px 7px rgb(28 33 70 / .16));
+  filter: drop-shadow(0 13px 8px rgb(28 33 70 / .18));
   outline: none;
 }
+
 .house-cat:focus-visible {
-  border-radius: 18px;
+  border-radius: 24px;
   outline: 2px solid var(--color-saffron);
-  outline-offset: 4px;
+  outline-offset: 5px;
 }
-.house-cat-photo-wrap {
+
+.house-cat-media-wrap {
   position: relative;
   display: block;
-  width: 190px;
-  height: 145px;
+  width: 240px;
+  height: 150px;
   transform-origin: 50% 100%;
+  will-change: transform;
 }
-.house-cat-photo {
+
+.house-cat-media {
   display: block;
   width: 100%;
   height: 100%;
@@ -253,30 +258,29 @@
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
-  filter: saturate(1.06) contrast(1.02);
+  image-rendering: auto;
 }
-.house-cat-walking .house-cat-photo-wrap {
-  animation: catPhotoWalk 1.15s ease-in-out infinite;
+
+.house-cat-walking .house-cat-media-wrap {
+  animation: catWalkBody 1.25s ease-in-out infinite;
 }
-.house-cat-sit .house-cat-photo-wrap,
-.house-cat-look .house-cat-photo-wrap {
-  animation: catPhotoBreath 3.5s ease-in-out infinite;
+
+.house-cat-idle .house-cat-media-wrap {
+  animation: catIdleBreath 3.8s ease-in-out infinite;
 }
-.house-cat-sleep .house-cat-photo-wrap {
-  animation: catPhotoSleep 5.2s ease-in-out infinite;
-  transform-origin: 55% 100%;
+
+.house-cat-media-wrap.cat-looking {
+  transform: translateY(-2px) rotate(calc(var(--look-side, 0) * 1deg));
 }
-.house-cat-look .house-cat-photo-wrap {
-  transform: translateY(-1px) rotate(calc(var(--look-side, 0) * 1deg));
+
+.house-cat:hover .house-cat-media {
+  filter: saturate(1.05) brightness(1.025);
 }
-.house-cat:hover .house-cat-photo {
-  filter: saturate(1.12) contrast(1.05) brightness(1.02);
-}
-.house-cat-run { filter: drop-shadow(0 12px 5px rgb(28 33 70 / .2)); }
+
 .cat-message {
   position: absolute;
-  right: 12px;
-  top: -2px;
+  right: 6px;
+  top: -5px;
   white-space: nowrap;
   border: 1px solid rgb(28 33 70 / .12);
   border-radius: 999px;
@@ -289,31 +293,38 @@
   box-shadow: 3px 3px 0 rgb(28 33 70 / .08);
   animation: catMessage .25s ease-out both;
 }
-@keyframes catPhotoWalk {
-  0%,100% { transform: translateY(0) scaleY(1); }
-  25% { transform: translateY(.7px) rotate(-.35deg); }
-  50% { transform: translateY(1.4px) scaleY(.994); }
-  75% { transform: translateY(.6px) rotate(.35deg); }
+
+@keyframes catWalkBody {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(1px) scaleY(.994); }
 }
-@keyframes catPhotoBreath {
-  0%,100% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(1.2px) scaleY(.988); }
+
+@keyframes catIdleBreath {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(1px) scaleY(.99); }
 }
-@keyframes catPhotoSleep {
-  0%,100% { transform: translateY(0) rotate(-.35deg); }
-  50% { transform: translateY(1.6px) rotate(.35deg); }
-}
+
 @keyframes catMessage {
   from { opacity: 0; transform: translateY(4px) scale(.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
 @media (max-width: 640px) {
-  .house-cat-layer { height: 120px; }
-  .house-cat, .house-cat-photo-wrap { width: 132px; height: 102px; }
-  .house-cat { bottom: 7px; }
-  .cat-message { right: 5px; top: 0; }
+  .house-cat-layer { height: 116px; }
+  .house-cat {
+    width: 170px;
+    height: 106px;
+    bottom: 4px;
+  }
+  .house-cat-media-wrap {
+    width: 170px;
+    height: 106px;
+  }
+  .cat-message { right: 2px; top: 0; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .house-cat-photo-wrap, .cat-message { animation: none !important; }
+  .house-cat-media-wrap,
+  .cat-message { animation: none !important; }
   .house-cat { transition-duration: 0ms !important; }
 }
