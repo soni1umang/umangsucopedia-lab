@@ -1,450 +1,92 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ImagePlus, LoaderCircle, Save, Eye, Edit3 } from 'lucide-react'
+import { AlignLeft, Bold, CheckSquare, Code2, Eye, Heading1, Heading2, Heading3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, Quote, Redo2, Save, Strikethrough, Table2, Underline, Undo2, Unlink, Video, Minus, Sigma, Info, AlertTriangle } from 'lucide-react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 
 type Props = { id?: number }
-type Category = { id: number; slug: string; name: string; parent_id: number | null; sort_order: number }
-type Post = {
-  id: number
-  slug: string
-  title: string
-  excerpt: string
-  content: string
-  cover_image: string | null
-  category_id: number | null
-  tags: string[]
-  status: 'draft' | 'published'
-  published_at: string | null
-}
+type Category = { id:number; slug:string; name:string; parent_id:number|null; sort_order:number }
+type Post = { id:number; slug:string; title:string; excerpt:string; content:string; cover_image:string|null; category_id:number|null; tags:string[]; status:'draft'|'published'; published_at:string|null }
+const IMAGE_TYPES=['image/jpeg','image/png','image/webp','image/gif','image/avif']
+const MAX_IMAGE_SIZE=10*1024*1024
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80)
-}
+function slugify(value:string){return value.trim().toLowerCase().normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)}
+function flattenCategories(categories:Category[],parentId:number|null=null,depth=0){return categories.filter(c=>c.parent_id===parentId).sort((a,b)=>a.sort_order-b.sort_order||a.name.localeCompare(b.name)).flatMap(category=>[{item:category,label:`${'— '.repeat(depth)}${category.name}`},...flattenCategories(categories,category.id,depth+1)])}
+function isHtml(value:string){return /<\\/?[a-z][\\s\\S]*>/i.test(value)}
+function sanitizeArticleHtml(value:string){return DOMPurify.sanitize(value,{USE_PROFILES:{html:true},ADD_TAGS:['iframe'],ADD_ATTR:['allow','allowfullscreen','frameborder','scrolling','target','rel','class','style']})}
+function htmlFromStoredContent(value:string){if(!value)return '';return sanitizeArticleHtml(isHtml(value)?value:String(marked.parse(value,{async:false})))}
 
-function flattenCategories(categories: Category[], parentId: number | null = null, depth = 0) {
-  return categories
-    .filter((c) => c.parent_id === parentId)
-    .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
-    .flatMap((category) => [
-      { item: category, label: `${'— '.repeat(depth)}${category.name}` },
-      ...flattenCategories(categories, category.id, depth + 1),
-    ])
-}
+function ToolbarButton({title,onClick,children,disabled}:{title:string;onClick:()=>void;children:React.ReactNode;disabled?:boolean}){return <button type="button" title={title} aria-label={title} disabled={disabled} onMouseDown={e=>e.preventDefault()} onClick={onClick} className="grid size-9 place-items-center rounded-lg text-ink/70 transition hover:bg-paper-deep hover:text-ink disabled:opacity-35">{children}</button>}
 
-export function Editor({ id }: Props) {
-  const nav = useNavigate()
-  const { user, ready } = useIdentity()
-  const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [excerpt, setExcerpt] = useState('')
-  const [content, setContent] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [tags, setTags] = useState('')
-  const [coverImage, setCoverImage] = useState('')
-  const [status, setStatus] = useState<'draft' | 'published'>('draft')
-  const [publishedAt, setPublishedAt] = useState<string | null>(null)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
-  const [allowed, setAllowed] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
+export function Editor({id}:Props){
+ const nav=useNavigate(); const {user,ready}=useIdentity()
+ const editorRef=useRef<HTMLDivElement|null>(null); const imageInputRef=useRef<HTMLInputElement|null>(null); const selectionRef=useRef<Range|null>(null); const initialisedRef=useRef(false)
+ const [title,setTitle]=useState(''),[slug,setSlug]=useState(''),[excerpt,setExcerpt]=useState(''),[content,setContent]=useState(''),[categoryId,setCategoryId]=useState(''),[tags,setTags]=useState(''),[coverImage,setCoverImage]=useState(''),[status,setStatus]=useState<'draft'|'published'>('draft'),[publishedAt,setPublishedAt]=useState<string|null>(null),[categories,setCategories]=useState<Category[]>([]),[loading,setLoading]=useState(true),[allowed,setAllowed]=useState(false),[busy,setBusy]=useState(false),[uploading,setUploading]=useState(false),[previewOpen,setPreviewOpen]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[wordCount,setWordCount]=useState(0)
 
-  useEffect(() => {
-    if (!ready) return
-    let alive = true
+ useEffect(()=>{if(!ready)return;let alive=true;async function load(){setLoading(true);setError('');if(!user){setAllowed(false);setLoading(false);return}
+  const [adminResult,categoryResult,postResult]=await Promise.all([supabase.from('admins').select('user_id').eq('user_id',user.id).maybeSingle(),supabase.from('categories').select('*').order('sort_order').order('name'),id?supabase.from('posts').select('*').eq('id',id).single():Promise.resolve({data:null,error:null})])
+  if(!alive)return
+  if(adminResult.error){setError(adminResult.error.message);setAllowed(false);setLoading(false);return}
+  if(!adminResult.data){setAllowed(false);setError('Your account does not have owner/admin access.');setLoading(false);return}
+  if(categoryResult.error){setError(categoryResult.error.message);setLoading(false);return}
+  if(postResult.error&&id){setError(postResult.error.message);setLoading(false);return}
+  const post=postResult.data as Post|null;setAllowed(true);setCategories((categoryResult.data??[]) as Category[])
+  if(post){setTitle(post.title??'');setSlug(post.slug??'');setExcerpt(post.excerpt??'');setContent(post.content??'');setCategoryId(post.category_id?.toString()??'');setTags((post.tags??[]).join(', '));setCoverImage(post.cover_image??'');setStatus(post.status??'draft');setPublishedAt(post.published_at??null)}
+  setLoading(false)
+ } void load();return()=>{alive=false}},[id,ready,user])
 
-    async function load() {
-      setLoading(true)
-      setError('')
+ useEffect(()=>{if(loading||!allowed||!editorRef.current||initialisedRef.current)return;editorRef.current.innerHTML=htmlFromStoredContent(content);initialisedRef.current=true;updateWordCount()},[loading,allowed,content])
+ function updateWordCount(){const text=editorRef.current?.innerText??'';setWordCount(text.trim()?text.trim().split(/\\s+/).length:0)}
+ function syncContent(){const html=editorRef.current?.innerHTML??'';setContent(html);updateWordCount();return html}
+ function rememberSelection(){const selection=window.getSelection();if(!selection||selection.rangeCount===0||!editorRef.current?.contains(selection.anchorNode))return;selectionRef.current=selection.getRangeAt(0).cloneRange()}
+ function restoreSelection(){const range=selectionRef.current;if(!range)return;const selection=window.getSelection();selection?.removeAllRanges();selection?.addRange(range);editorRef.current?.focus()}
+ function command(name:string,value?:string){editorRef.current?.focus();document.execCommand(name,false,value);syncContent()}
+ function formatBlock(tag:string){command('formatBlock',tag)}
+ function insertHtml(html:string){restoreSelection();document.execCommand('insertHTML',false,html);syncContent()}
+ function addLink(){rememberSelection();const url=window.prompt('Paste the URL','https://');if(!url)return;command('createLink',/^https?:\\/\\//i.test(url)?url:`https://${url}`)}
+ function addVideo(){rememberSelection();const url=window.prompt('Paste a YouTube or Vimeo URL');if(!url)return;const youtube=url.match(/(?:youtube\\.com\\/(?:watch\\?v=|shorts\\/|embed\\/)|youtu\\.be\\/)([\\w-]{6,})/i),vimeo=url.match(/vimeo\\.com\\/(\\d+)/i);let embed='';if(youtube)embed=`https://www.youtube-nocookie.com/embed/${youtube[1]}`;else if(vimeo)embed=`https://player.vimeo.com/video/${vimeo[1]}`;else if(/^https?:\\/\\//i.test(url))embed=url;else{setError('Please paste a valid YouTube, Vimeo, or HTTPS video URL.');return}const videoTitle=window.prompt('Video title (optional)','Embedded video')||'Embedded video';insertHtml(`<div class="article-video"><iframe src="${embed.replace(/"/g,'&quot;')}" title="${videoTitle.replace(/"/g,'&quot;')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><p><br></p>`)}
+ function addImageFromUrl(){rememberSelection();const url=window.prompt('Paste an image URL');if(!url)return;const alt=window.prompt('Alt text (describe the image)','')??'',caption=window.prompt('Caption (optional)','')??'';insertHtml(`<figure class="article-figure"><img src="${url.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}" loading="lazy">${caption?`<figcaption>${caption}</figcaption>`:''}</figure><p><br></p>`)}
+ async function uploadArticleImage(file:File){if(!user)return;if(!IMAGE_TYPES.includes(file.type)){setError('Please choose JPG, PNG, WebP, GIF, or AVIF.');return}if(file.size>MAX_IMAGE_SIZE){setError('Please keep article images under 10 MB each.');return}setError('');setNotice('');setUploading(true);try{const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(-80)||'image',folder=id?`posts/${id}`:'drafts',path=`${user.id}/${folder}/${Date.now()}-${safeName}`;const result=await supabase.storage.from('blog-images').upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});if(result.error)throw result.error;const url=supabase.storage.from('blog-images').getPublicUrl(path).data.publicUrl,alt=window.prompt('Alt text (describe the image)',file.name.replace(/\\.[^.]+$/,''))??'',caption=window.prompt('Caption (optional)','')??'';insertHtml(`<figure class="article-figure"><img src="${url.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${caption}</figcaption></figure><p><br></p>`);setNotice('Image uploaded and inserted.')}catch(cause){setError(cause instanceof Error?cause.message:'Image upload failed.')}finally{setUploading(false)}}
+ async function handleImageInput(event:ChangeEvent<HTMLInputElement>){const file=event.target.files?.[0];event.target.value='';if(file)await uploadArticleImage(file)}
+ async function handlePaste(event:React.ClipboardEvent<HTMLDivElement>){const image=Array.from(event.clipboardData.files).find(file=>file.type.startsWith('image/'));if(!image)return;event.preventDefault();rememberSelection();await uploadArticleImage(image)}
+ async function handleDrop(event:React.DragEvent<HTMLDivElement>){const image=Array.from(event.dataTransfer.files).find(file=>file.type.startsWith('image/'));if(!image)return;event.preventDefault();rememberSelection();await uploadArticleImage(image)}
+ function addTable(){rememberSelection();const rows=Math.max(1,Math.min(10,Number(window.prompt('Rows','3'))||3)),cols=Math.max(1,Math.min(8,Number(window.prompt('Columns','3'))||3));let html='<table class="article-table"><thead><tr>'+Array.from({length:cols},(_,i)=>`<th>Header ${i+1}</th>`).join('')+'</tr></thead><tbody>';for(let r=0;r<rows-1;r++)html+='<tr>'+Array.from({length:cols},()=>'<td>Cell</td>').join('')+'</tr>';html+='</tbody></table><p><br></p>';insertHtml(html)}
+ function addCallout(kind:'note'|'warning'){rememberSelection();const label=kind==='note'?'Note':'Experimental note',text=window.prompt(`${label} text`);if(!text)return;insertHtml(`<aside class="article-callout ${kind}"><strong>${label}</strong><p>${text.replace(/\\n/g,'<br>')}</p></aside><p><br></p>`)}
+ function addEquation(){rememberSelection();const equation=window.prompt('Enter an equation, e.g. f₀ = 1/(2π√LC)');if(!equation)return;insertHtml(`<div class="article-equation" contenteditable="false"><span>${equation}</span></div><p><br></p>`)}
+ function addCodeBlock(){rememberSelection();const language=window.prompt('Language (optional)','python')||'text';insertHtml(`<pre class="article-code"><code class="language-${language.replace(/[^a-z0-9_-]/gi,'')}">Write code here…</code></pre><p><br></p>`)}
 
-      if (!user) {
-        if (alive) {
-          setAllowed(false)
-          setLoading(false)
-        }
-        return
-      }
+ const categoryOptions=useMemo(()=>flattenCategories(categories),[categories])
+ const previewHtml=useMemo(()=>sanitizeArticleHtml(content||'<p>Your article preview will appear here.</p>'),[content])
+ function effectiveSlug(){return slugify(slug||title)||`post-${Date.now()}`}
+ async function uploadCover(event:ChangeEvent<HTMLInputElement>){const file=event.target.files?.[0];event.target.value='';if(!file)return;if(!IMAGE_TYPES.includes(file.type)){setError('Please choose JPG, PNG, WebP, GIF, or AVIF.');return}if(file.size>MAX_IMAGE_SIZE){setError('Please keep cover images under 10 MB.');return}setError('');setNotice('');setUploading(true);try{const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(-80)||'cover',path=`${user?.id}/covers/${Date.now()}-${safeName}`;const result=await supabase.storage.from('blog-images').upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});if(result.error)throw result.error;setCoverImage(supabase.storage.from('blog-images').getPublicUrl(path).data.publicUrl);setNotice('Cover image uploaded.')}catch(cause){setError(cause instanceof Error?cause.message:'Image upload failed.')}finally{setUploading(false)}}
 
-      const [adminResult, categoryResult, postResult] = await Promise.all([
-        supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle(),
-        supabase.from('categories').select('*').order('sort_order').order('name'),
-        id
-          ? supabase.from('posts').select('*').eq('id', id).single()
-          : Promise.resolve({ data: null, error: null }),
-      ])
+ async function save(nextStatus:'draft'|'published',event?:FormEvent<HTMLFormElement>){event?.preventDefault();if(!allowed||!user)return;setError('');setNotice('');setBusy(true);try{const cleanTitle=title.trim();if(!cleanTitle)throw new Error('Title is required.');const html=sanitizeArticleHtml(syncContent()),nextSlug=effectiveSlug();const {data:clash,error:clashError}=await supabase.from('posts').select('id').eq('slug',nextSlug).limit(1);if(clashError)throw clashError;if(clash?.[0]&&clash[0].id!==id)throw new Error(`Another post already uses the URL "${nextSlug}".`);const nextPublishedAt=nextStatus==='published'?(publishedAt??new Date().toISOString()):null;const row={title:cleanTitle,slug:nextSlug,excerpt:excerpt.trim(),content:html,cover_image:coverImage.trim()||null,category_id:categoryId?Number(categoryId):null,tags:[...new Set(tags.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean))].slice(0,20),status:nextStatus,published_at:nextPublishedAt,updated_at:new Date().toISOString()};if(id){const result=await supabase.from('posts').update(row).eq('id',id).select().single();if(result.error)throw result.error;setStatus(nextStatus);setPublishedAt(nextPublishedAt);setContent(html);setNotice(nextStatus==='published'?'Post updated.':'Draft saved.')}else{const result=await supabase.from('posts').insert(row).select().single();if(result.error)throw result.error;setStatus(nextStatus);setPublishedAt(nextPublishedAt);setContent(html);setNotice(nextStatus==='published'?'Post published.':'Draft saved.');await nav({to:'/admin/posts/$id',params:{id:String(result.data.id)},replace:true})}}catch(cause){setError(cause instanceof Error?cause.message:'Could not save this post.')}finally{setBusy(false)}}
 
-      if (!alive) return
+ if(!ready||loading)return <section className="container-uco py-20">Loading editor…</section>
+ if(!user)return <section className="container-uco py-20"><h1 className="font-display text-4xl font-semibold">Owner login required<span className="text-terracotta">.</span></h1><Link to="/login" className="btn-ink mt-6">Login</Link></section>
+ if(!allowed)return <section className="container-uco py-20"><h1 className="font-display text-4xl font-semibold">Access denied<span className="text-terracotta">.</span></h1><p className="mt-3 text-ink/65">{error||'You do not have admin access.'}</p><Link to="/admin" className="btn-ghost mt-6">Back to dashboard</Link></section>
 
-      if (adminResult.error) {
-        setError(adminResult.error.message)
-        setAllowed(false)
-        setLoading(false)
-        return
-      }
-
-      if (!adminResult.data) {
-        setAllowed(false)
-        setError('Your account does not have owner/admin access.')
-        setLoading(false)
-        return
-      }
-
-      if (categoryResult.error) {
-        setError(categoryResult.error.message)
-        setLoading(false)
-        return
-      }
-
-      if (postResult.error && id) {
-        setError(postResult.error.message)
-        setLoading(false)
-        return
-      }
-
-      const post = postResult.data as Post | null
-      setAllowed(true)
-      setCategories((categoryResult.data ?? []) as Category[])
-
-      if (post) {
-        setTitle(post.title ?? '')
-        setSlug(post.slug ?? '')
-        setExcerpt(post.excerpt ?? '')
-        setContent(post.content ?? '')
-        setCategoryId(post.category_id?.toString() ?? '')
-        setTags((post.tags ?? []).join(', '))
-        setCoverImage(post.cover_image ?? '')
-        setStatus(post.status ?? 'draft')
-        setPublishedAt(post.published_at ?? null)
-      }
-
-      setLoading(false)
-    }
-
-    void load()
-    return () => {
-      alive = false
-    }
-  }, [id, ready, user])
-
-  const categoryOptions = useMemo(() => flattenCategories(categories), [categories])
-  const previewHtml = useMemo(() => {
-    if (!previewOpen) return ''
-    const raw = marked.parse(content || '*Your markdown preview will appear here.*', { async: false })
-    return DOMPurify.sanitize(String(raw))
-  }, [content, previewOpen])
-
-  function effectiveSlug() {
-    return slugify(slug || title) || `post-${Date.now()}`
-  }
-
-  async function uploadCover(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'].includes(file.type)) {
-      setError('Please choose a JPG, PNG, WebP, GIF, or AVIF image.')
-      return
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Please keep cover images under 10 MB.')
-      return
-    }
-
-    setError('')
-    setNotice('')
-    setUploading(true)
-
-    try {
-      const extension = file.name.includes('.') ? file.name.split('.').pop() : 'bin'
-      const safeName = file.name
-        .replace(/[^a-zA-Z0-9._-]+/g, '-')
-        .replace(/-+/g, '-')
-        .slice(-80)
-      const path = `${user?.id}/${Date.now()}-${safeName || `cover.${extension}`}`
-
-      const result = await supabase.storage.from('blog-images').upload(path, file, {
-        cacheControl: '3600',
-        contentType: file.type,
-        upsert: false,
-      })
-      if (result.error) throw result.error
-
-      const publicUrl = supabase.storage.from('blog-images').getPublicUrl(path).data.publicUrl
-      setCoverImage(publicUrl)
-      setNotice('Image uploaded.')
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Image upload failed.')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  async function save(nextStatus: 'draft' | 'published', event?: FormEvent<HTMLFormElement>) {
-    event?.preventDefault()
-    if (!allowed || !user) return
-
-    setError('')
-    setNotice('')
-    setBusy(true)
-
-    try {
-      const cleanTitle = title.trim()
-      if (!cleanTitle) throw new Error('Title is required.')
-
-      const nextSlug = effectiveSlug()
-      const clashQuery = supabase.from('posts').select('id').eq('slug', nextSlug).limit(1)
-      const { data: clash, error: clashError } = await clashQuery
-      if (clashError) throw clashError
-      if (clash?.[0] && clash[0].id !== id) {
-        throw new Error(`Another post already uses the URL "${nextSlug}".`)
-      }
-
-      const nextPublishedAt =
-        nextStatus === 'published'
-          ? (publishedAt ?? new Date().toISOString())
-          : null
-
-      const row = {
-        title: cleanTitle,
-        slug: nextSlug,
-        excerpt: excerpt.trim(),
-        content,
-        cover_image: coverImage.trim() || null,
-        category_id: categoryId ? Number(categoryId) : null,
-        tags: [...new Set(tags.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 20),
-        status: nextStatus,
-        published_at: nextPublishedAt,
-        updated_at: new Date().toISOString(),
-      }
-
-      if (id) {
-        const result = await supabase.from('posts').update(row).eq('id', id).select().single()
-        if (result.error) throw result.error
-        setStatus(nextStatus)
-        setPublishedAt(nextPublishedAt)
-        setNotice(nextStatus === 'published' ? 'Post updated.' : 'Draft saved.')
-      } else {
-        const result = await supabase.from('posts').insert(row).select().single()
-        if (result.error) throw result.error
-        setNotice(nextStatus === 'published' ? 'Post published.' : 'Draft saved.')
-        setStatus(nextStatus)
-        setPublishedAt(nextPublishedAt)
-        await nav({ to: '/admin/posts/$id', params: { id: String(result.data.id) }, replace: true })
-      }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not save this post.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  if (!ready || loading) {
-    return <section className="container-uco py-20">Loading editor…</section>
-  }
-
-  if (!user) {
-    return (
-      <section className="container-uco py-20">
-        <h1 className="font-display text-4xl font-semibold">Owner login required<span className="text-terracotta">.</span></h1>
-        <Link to="/login" className="btn-ink mt-6">Login</Link>
-      </section>
-    )
-  }
-
-  if (!allowed) {
-    return (
-      <section className="container-uco py-20">
-        <h1 className="font-display text-4xl font-semibold">Access denied<span className="text-terracotta">.</span></h1>
-        <p className="mt-3 text-ink/65">{error || 'You do not have admin access.'}</p>
-        <Link to="/admin" className="btn-ghost mt-6">Back to dashboard</Link>
-      </section>
-    )
-  }
-
-  return (
-    <form className="container-uco py-10 md:py-14" onSubmit={(event) => void save(status, event)}>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <Link to="/admin" className="text-sm text-ink/60 hover:text-terracotta">← Dashboard</Link>
-          <h1 className="mt-3 font-display text-4xl font-semibold">
-            {id ? 'Edit post' : 'New post'}<span className="text-terracotta">.</span>
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          <button type="button" className="btn-ghost" disabled={busy || uploading} onClick={() => void save('draft')}>
-            <Save className="size-4" /> Save draft
-          </button>
-          <button type="button" className="btn-saffron" disabled={busy || uploading} onClick={() => void save('published')}>
-            {busy ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            {status === 'published' ? 'Update post' : 'Publish'}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-        <div className="space-y-5">
-          <label className="label block">
-            Title
-            <input
-              className="field mt-2 w-full text-lg"
-              required
-              maxLength={200}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="A clear, memorable title"
-            />
-          </label>
-
-          <label className="label block">
-            URL slug <span className="font-normal text-ink/50">(leave blank to make it from the title)</span>
-            <input
-              className="field mt-2 w-full"
-              maxLength={80}
-              value={slug}
-              onChange={(event) => setSlug(event.target.value)}
-              placeholder="my-post-title"
-            />
-          </label>
-
-          <label className="label block">
-            Short introduction
-            <textarea
-              className="field mt-2 min-h-24 w-full"
-              maxLength={400}
-              value={excerpt}
-              onChange={(event) => setExcerpt(event.target.value)}
-              placeholder="A short summary shown on the blog cards"
-            />
-          </label>
-
-          <label className="label block">
-            Post content <span className="font-normal text-ink/50">(Markdown supported)</span>
-            <textarea
-              className="field mt-2 min-h-[26rem] w-full resize-y font-mono text-sm leading-6"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              placeholder={'## Start writing\n\nUse **bold**, *italics*, lists, and links in Markdown.'}
-            />
-          </label>
-
-          <div className="rounded-2xl border border-ink/15 bg-card p-5">
-            <div className="flex items-center justify-between gap-4">
-              <p className="label !mb-0">Post preview</p>
-              <button
-                type="button"
-                className="btn-ghost !px-3 !py-1.5 text-xs"
-                onClick={() => setPreviewOpen((open) => !open)}
-              >
-                {previewOpen ? <><Edit3 className="size-3.5" /> Edit</> : <><Eye className="size-3.5" /> Preview</>}
-              </button>
-            </div>
-            {previewOpen ? (
-              <div className="prose-uco mt-4 min-h-28" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            ) : (
-              <p className="mt-3 text-sm text-ink/55">Preview is off while writing so the editor stays responsive.</p>
-            )}
-          </div>
-        </div>
-
-        <aside className="space-y-5 rounded-2xl border border-ink/15 bg-card p-5 md:p-6">
-          <label className="label block">
-            Category
-            <select className="field mt-2 w-full" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-              <option value="">Uncategorized</option>
-              {categoryOptions.map(({ item, label }) => (
-                <option key={item.id} value={item.id}>{label}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="label block">
-            Tags <span className="font-normal text-ink/50">(separate with commas)</span>
-            <input className="field mt-2 w-full" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="books, science, ideas" />
-          </label>
-
-          <div>
-            <p className="label">Cover image</p>
-            <label className={`btn-ghost mt-2 w-full cursor-pointer justify-center ${uploading ? 'pointer-events-none opacity-60' : ''}`}>
-              {uploading ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-              {uploading ? 'Uploading…' : 'Upload image'}
-              <input
-                className="sr-only"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-                onChange={uploadCover}
-                disabled={uploading}
-              />
-            </label>
-            <input
-              className="field mt-3 w-full"
-              value={coverImage}
-              onChange={(event) => setCoverImage(event.target.value)}
-              placeholder="Or paste an image URL"
-            />
-            {coverImage && (
-              <img className="mt-3 aspect-video w-full rounded-xl border border-ink/15 object-cover" src={coverImage} alt="Cover preview" />
-            )}
-          </div>
-
-          <div className="rounded-xl bg-paper p-4 text-sm">
-            <p className="font-semibold">
-              Status: <span className="capitalize">{status}</span>
-            </p>
-            <p className="mt-1 text-ink/60">
-              Drafts stay private. Published posts appear on the public blog.
-            </p>
-          </div>
-
-          {id && (
-            <button type="submit" className="btn-ink w-full" disabled={busy || uploading}>
-              {busy ? <LoaderCircle className="size-4 animate-spin" /> : null}
-              Save current status
-            </button>
-          )}
-
-          {id && status === 'published' && (
-            <Link to="/posts/$slug" params={{ slug }} className="inline-flex items-center text-sm text-terracotta hover:underline">
-              View published post ↗
-            </Link>
-          )}
-        </aside>
-      </div>
-
-      <div className="sticky bottom-4 z-30 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink/15 bg-card/95 p-3 shadow-xl backdrop-blur">
-        <p className="text-sm text-ink/60">
-          {status === 'published' ? 'Published post' : 'Draft'}{title.trim() ? ` · ${title.trim()}` : ''}
-        </p>
-        <div className="flex gap-2">
-          <button type="button" className="btn-ghost" disabled={busy || uploading} onClick={() => void save('draft')}>
-            <Save className="size-4" /> Save draft
-          </button>
-          <button type="button" className="btn-saffron" disabled={busy || uploading} onClick={() => void save('published')}>
-            {busy ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            {status === 'published' ? 'Update post' : 'Publish'}
-          </button>
-        </div>
-      </div>
-
-      {(error || notice) && (
-        <p role={error ? 'alert' : 'status'} className={`mt-6 rounded-lg px-4 py-3 text-sm ${error ? 'bg-terracotta/10 text-terracotta' : 'bg-saffron/50'}`}>
-          {error || notice}
-        </p>
-      )}
-    </form>
-  )
+ return <form className="container-uco py-8 md:py-12" onSubmit={event=>void save(status,event)}>
+  <div className="mb-7 flex flex-wrap items-center justify-between gap-4"><div><Link to="/admin" className="text-sm text-ink/60 hover:text-terracotta">← Dashboard</Link><h1 className="mt-3 font-display text-4xl font-semibold">{id?'Edit post':'New post'}<span className="text-terracotta">.</span></h1><p className="mt-1 text-sm text-ink/50">Write visually. Images, videos, equations and formatting are built in.</p></div><div className="flex gap-2"><button type="button" className="btn-ghost" disabled={busy||uploading} onClick={()=>void save('draft')}><Save className="size-4"/> Save draft</button><button type="button" className="btn-saffron" disabled={busy||uploading} onClick={()=>void save('published')}>{busy?<LoaderCircle className="size-4 animate-spin"/>:null}{status==='published'?'Update post':'Publish'}</button></div></div>
+  <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_19rem]"><div className="space-y-5">
+   <input className="field !border-0 !bg-transparent !px-0 text-3xl font-display font-semibold shadow-none focus:!ring-0 md:text-4xl" required maxLength={200} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Your post title…"/>
+   <div className="grid gap-4 md:grid-cols-2"><label className="label block">URL slug<input className="field mt-2" maxLength={80} value={slug} onChange={e=>setSlug(e.target.value)} placeholder="my-post-title"/></label><label className="label block">Short introduction<textarea className="field mt-2 min-h-24" maxLength={400} value={excerpt} onChange={e=>setExcerpt(e.target.value)} placeholder="A short summary shown on blog cards"/></label></div>
+   <div className="overflow-hidden rounded-2xl border border-ink/15 bg-card shadow-sm"><div className="sticky top-2 z-10 flex flex-wrap items-center gap-1 border-b border-ink/10 bg-card/95 p-2 backdrop-blur">
+    <ToolbarButton title="Undo" onClick={()=>command('undo')}><Undo2 className="size-4"/></ToolbarButton><ToolbarButton title="Redo" onClick={()=>command('redo')}><Redo2 className="size-4"/></ToolbarButton><span className="mx-1 h-6 w-px bg-ink/10"/>
+    <ToolbarButton title="Bold" onClick={()=>command('bold')}><Bold className="size-4"/></ToolbarButton><ToolbarButton title="Italic" onClick={()=>command('italic')}><Italic className="size-4"/></ToolbarButton><ToolbarButton title="Underline" onClick={()=>command('underline')}><Underline className="size-4"/></ToolbarButton><ToolbarButton title="Strikethrough" onClick={()=>command('strikeThrough')}><Strikethrough className="size-4"/></ToolbarButton>
+    <ToolbarButton title="Heading 1" onClick={()=>formatBlock('h2')}><Heading1 className="size-4"/></ToolbarButton><ToolbarButton title="Heading 2" onClick={()=>formatBlock('h3')}><Heading2 className="size-4"/></ToolbarButton><ToolbarButton title="Heading 3" onClick={()=>formatBlock('h4')}><Heading3 className="size-4"/></ToolbarButton><ToolbarButton title="Paragraph" onClick={()=>formatBlock('p')}><AlignLeft className="size-4"/></ToolbarButton>
+    <ToolbarButton title="Bulleted list" onClick={()=>command('insertUnorderedList')}><List className="size-4"/></ToolbarButton><ToolbarButton title="Numbered list" onClick={()=>command('insertOrderedList')}><ListOrdered className="size-4"/></ToolbarButton><ToolbarButton title="Checklist" onClick={()=>insertHtml('<ul class="article-checklist"><li>☐ Task</li></ul>')}><CheckSquare className="size-4"/></ToolbarButton><ToolbarButton title="Quote" onClick={()=>formatBlock('blockquote')}><Quote className="size-4"/></ToolbarButton>
+    <span className="mx-1 h-6 w-px bg-ink/10"/><ToolbarButton title="Link" onClick={addLink}><Link2 className="size-4"/></ToolbarButton><ToolbarButton title="Remove link" onClick={()=>command('unlink')}><Unlink className="size-4"/></ToolbarButton><ToolbarButton title="Horizontal divider" onClick={()=>insertHtml('<hr><p><br></p>')}><Minus className="size-4"/></ToolbarButton>
+    <ToolbarButton title="Upload image" onClick={()=>{rememberSelection();imageInputRef.current?.click()}} disabled={uploading}><ImagePlus className="size-4"/></ToolbarButton><ToolbarButton title="Image from URL" onClick={addImageFromUrl}><ImagePlus className="size-4 text-terracotta"/></ToolbarButton><ToolbarButton title="Embed YouTube/Vimeo" onClick={addVideo}><Video className="size-4"/></ToolbarButton><ToolbarButton title="Insert equation" onClick={addEquation}><Sigma className="size-4"/></ToolbarButton><ToolbarButton title="Code block" onClick={addCodeBlock}><Code2 className="size-4"/></ToolbarButton><ToolbarButton title="Table" onClick={addTable}><Table2 className="size-4"/></ToolbarButton><ToolbarButton title="Note callout" onClick={()=>addCallout('note')}><Info className="size-4"/></ToolbarButton><ToolbarButton title="Warning callout" onClick={()=>addCallout('warning')}><AlertTriangle className="size-4"/></ToolbarButton>
+    <input ref={imageInputRef} className="sr-only" type="file" accept={IMAGE_TYPES.join(',')} onChange={handleImageInput}/>
+   </div><div ref={editorRef} contentEditable suppressContentEditableWarning spellCheck className="prose-uco editor-canvas min-h-[38rem] max-w-none px-6 py-7 outline-none md:px-10" onInput={syncContent} onKeyUp={updateWordCount} onMouseUp={rememberSelection} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();void save('draft')}}} onPaste={handlePaste} onDrop={handleDrop} onDragOver={e=>{if(Array.from(e.dataTransfer.items).some(i=>i.kind==='file'))e.preventDefault()}} data-placeholder="Start writing your story… Drop or paste images directly here."/></div><div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 bg-paper-deep/25 px-4 py-2 text-[.65rem] text-ink/45"><span>{wordCount.toLocaleString()} words</span><span>Tip: paste or drag an image directly into the editor.</span></div></div>
+   <div className="rounded-2xl border border-ink/15 bg-card p-5"><div className="flex items-center justify-between gap-4"><p className="label !mb-0">Live article preview</p><button type="button" className="btn-ghost !px-3 !py-1.5 text-xs" onClick={()=>setPreviewOpen(v=>!v)}>{previewOpen?<><AlignLeft className="size-3.5"/> Editor</>:<><Eye className="size-3.5"/> Preview</>}</button></div>{previewOpen?<div className="prose-uco mt-4" dangerouslySetInnerHTML={{__html:previewHtml}}/>:<p className="mt-3 text-sm text-ink/55">Preview shows the same rich content readers will see.</p>}</div>
+  </div>
+  <aside className="space-y-5 rounded-2xl border border-ink/15 bg-card p-5 md:p-6 xl:sticky xl:top-6"><label className="label block">Category<select className="field mt-2" value={categoryId} onChange={e=>setCategoryId(e.target.value)}><option value="">Uncategorized</option>{categoryOptions.map(({item,label})=><option key={item.id} value={item.id}>{label}</option>)}</select></label><label className="label block">Tags <span className="font-normal text-ink/50">(comma separated)</span><input className="field mt-2" value={tags} onChange={e=>setTags(e.target.value)} placeholder="books, science, ideas"/></label><div><p className="label">Cover image</p><label className={`btn-ghost mt-2 w-full cursor-pointer justify-center ${uploading?'pointer-events-none opacity-60':''}`}>{uploading?<LoaderCircle className="size-4 animate-spin"/>:<ImagePlus className="size-4"/>}{uploading?'Uploading…':'Upload cover'}<input className="sr-only" type="file" accept={IMAGE_TYPES.join(',')} onChange={uploadCover} disabled={uploading}/></label><input className="field mt-3" value={coverImage} onChange={e=>setCoverImage(e.target.value)} placeholder="Or paste image URL"/>{coverImage&&<img className="mt-3 aspect-video w-full rounded-xl border border-ink/15 object-cover" src={coverImage} alt="Cover preview"/>}</div><div className="rounded-xl bg-paper p-4 text-sm"><p className="font-semibold">Status: <span className="capitalize">{status}</span></p><p className="mt-1 text-ink/60">Drafts stay private. Published posts appear on the public blog.</p></div>{id&&<button type="submit" className="btn-ink w-full" disabled={busy||uploading}>{busy?<LoaderCircle className="size-4 animate-spin"/>:null}Save current status</button>}{id&&status==='published'&&<Link to="/posts/$slug" params={{slug}} className="inline-flex text-sm text-terracotta hover:underline">View published post ↗</Link>}</aside>
+  </div>
+  <div className="sticky bottom-4 z-30 mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink/15 bg-card/95 p-3 shadow-xl backdrop-blur"><p className="text-sm text-ink/60">{status==='published'?'Published post':'Draft'}{title.trim()? ` · ${title.trim()}`:''}</p><div className="flex gap-2"><button type="button" className="btn-ghost" disabled={busy||uploading} onClick={()=>void save('draft')}><Save className="size-4"/> Save draft</button><button type="button" className="btn-saffron" disabled={busy||uploading} onClick={()=>void save('published')}>{busy?<LoaderCircle className="size-4 animate-spin"/>:null}{status==='published'?'Update post':'Publish'}</button></div></div>
+  {(error||notice)&&<p role={error?'alert':'status'} className={`mt-5 rounded-lg px-4 py-3 text-sm ${error?'bg-terracotta/10 text-terracotta':'bg-saffron/50'}`}>{error||notice}</p>}
+ </form>
 }
