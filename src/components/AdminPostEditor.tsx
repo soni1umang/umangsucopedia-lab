@@ -14,7 +14,7 @@ const MAX_IMAGE_SIZE=10*1024*1024
 
 function slugify(value:string){return value.trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)}
 function flattenCategories(categories:Category[],parentId:number|null=null,depth=0){return categories.filter(c=>c.parent_id===parentId).sort((a,b)=>a.sort_order-b.sort_order||a.name.localeCompare(b.name)).flatMap(category=>[{item:category,label:`${'— '.repeat(depth)}${category.name}`},...flattenCategories(categories,category.id,depth+1)])}
-function isHtml(value:string){return /<\/[a-z][\s\\S]*>/i.test(value)}
+function isHtml(value:string){return /<\/[a-z][\s\S]*>/i.test(value)}
 function sanitizeArticleHtml(value:string){return DOMPurify.sanitize(value,{USE_PROFILES:{html:true},ADD_TAGS:['iframe'],ADD_ATTR:['allow','allowfullscreen','frameborder','scrolling','target','rel','class','style']})}
 function htmlFromStoredContent(value:string){if(!value)return '';return sanitizeArticleHtml(isHtml(value)?value:String(marked.parse(value,{async:false})))}
 
