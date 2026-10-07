@@ -9,6 +9,7 @@ import { getContent, type AboutContent, type Album, type Painting, type Workbenc
 import { useSiteSettings } from '@/lib/site-context'
 import { img } from '@/lib/img'
 import { ResearchConstellation } from '@/components/ResearchConstellation'
+import { SiteStatus } from '@/components/SiteStatus'
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -39,6 +40,7 @@ function Home() {
   const featuredBench = workbench.filter(w => w.featured).slice(0, 2)
 
   return <>
+    <SiteStatus />
     <section className="container-uco relative overflow-hidden pb-16 pt-10 md:pb-24 md:pt-16">
       <div className="pointer-events-none absolute -right-24 top-0 size-[30rem] rounded-full bg-saffron/20 blur-3xl drift"/>
       <div className="grid items-center gap-12 lg:grid-cols-[1.08fr_.92fr]">
