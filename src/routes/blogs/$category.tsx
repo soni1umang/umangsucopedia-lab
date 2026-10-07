@@ -9,6 +9,7 @@ import { categoryArt } from '@/config/category-art'
 import { getContent, type WebsiteAttempt } from '@/lib/content'
 import { ucopediaHistory as fallbackHistory } from '@/config/site'
 import { ArrowUpRight } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 function descendantIds(all: any[], root: number) {
   const ids = [root]
@@ -40,14 +41,34 @@ export const Route = createFileRoute('/blogs/$category')({
 function Category() {
   const { category: slug } = Route.useParams()
   const [state, setState] = React.useState<{category:any; all:any[]; posts:any[]} | null>(null)
+  const [pinnedIds, setPinnedIds] = React.useState<number[]>([])
 
   React.useEffect(() => {
-    Promise.all([categories(), posts()]).then(([all, ps]) => {
+    let cancelled = false
+    setState(null)
+    setPinnedIds([])
+    Promise.all([categories(), posts()]).then(async ([all, ps]) => {
       const category = all.find((c: any) => c.slug === slug)
       if (!category) return
       const ids = descendantIds(all, category.id)
-      setState({ category, all, posts: ps.filter((p: any) => ids.includes(p.category_id)) })
+      const visiblePosts = ps.filter((p: any) => ids.includes(p.category_id))
+      const pinResult = await supabase
+        .from('category_post_pins')
+        .select('post_id,position')
+        .eq('category_id', category.id)
+        .order('position', { ascending: true })
+
+      if (cancelled) return
+      const allowed = new Set(visiblePosts.map((p: any) => Number(p.id)))
+      const pins = (pinResult.data ?? [])
+        .map((row: any) => Number(row.post_id))
+        .filter((id: number) => allowed.has(id))
+      setPinnedIds(pins)
+      setState({ category, all, posts: visiblePosts })
+    }).catch(() => {
+      if (!cancelled) setState(null)
     })
+    return () => { cancelled = true }
   }, [slug])
 
   if (!state) return <section className="container-uco py-20">Loading…</section>
@@ -100,11 +121,37 @@ function Category() {
         </section>
       )}
 
+      {pinnedIds.length > 0 && (
+        <section className="container-uco pt-12">
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-ink/15 pb-4">
+            <div>
+              <p className="eyebrow">Pinned</p>
+              <h2 className="mt-1 font-display text-3xl font-semibold">Worth keeping close<span className="text-terracotta">.</span></h2>
+            </div>
+            <span className="font-mono text-[.62rem] uppercase tracking-[.16em] text-ink/35">{pinnedIds.length} featured</span>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pinnedIds.map((id: number) => {
+              const post = postList.find((p: any) => Number(p.id) === id)
+              return post ? <PostCard key={post.id} post={post} /> : null
+            })}
+          </div>
+        </section>
+      )}
+
       <section className="container-uco pt-12">
         {postList.length ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {postList.map((p: any) => <PostCard key={p.id} post={p} />)}
-          </div>
+          <>
+            {pinnedIds.length > 0 && (
+              <div className="mb-6 flex items-center gap-3 border-b border-ink/10 pb-3">
+                <p className="eyebrow">All posts</p>
+                <span className="font-mono text-[.58rem] text-ink/30">excluding pinned</span>
+              </div>
+            )}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {postList.filter((p: any) => !pinnedIds.includes(Number(p.id))).map((p: any) => <PostCard key={p.id} post={p} />)}
+            </div>
+          </>
         ) : (
           <div className="rounded-2xl border border-dashed border-ink/25 p-12 text-center">
             <p className="font-display text-2xl italic">Blank pages, for now.</p>
