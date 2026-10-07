@@ -659,6 +659,9 @@
 .mobile-radial-wrap.is-open .mobile-radial-item {
   transform: translate(-50%, -50%) scale(1);
 }
+.mobile-radial-wrap.is-open .mobile-radial-bubble {
+  opacity: 1;
+}
 .mobile-radial-bubble {
   position: absolute;
   left: 0;
@@ -686,7 +689,16 @@
   pointer-events: auto;
   transition: background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-.mobile-radial-icon { width: 17px; height: 17px; }
+.mobile-radial-icon {
+  display: block;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 1;
+  visibility: visible;
+}
 .mobile-radial-bubble.is-active {
   background: var(--color-ink);
   color: var(--color-paper);
@@ -698,6 +710,9 @@
   color: var(--color-ink);
   outline: none;
   box-shadow: 4px 5px 0 var(--color-ink);
+}
+.mobile-radial-wrap.is-open .mobile-radial-child-toggle {
+  opacity: 1;
 }
 .mobile-radial-child-toggle {
   position: absolute;
