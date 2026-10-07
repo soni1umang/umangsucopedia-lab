@@ -578,7 +578,8 @@
 
 
 
-/* Mobile radial navigation: responsive fan of compact orbit bubbles. */
+
+/* Mobile radial navigation: responsive fan + full-width lower submenu. */
 .mobile-menu-button {
   position: relative;
   z-index: 80;
@@ -647,6 +648,7 @@
   opacity: 1;
   transform: scale(1);
 }
+
 .mobile-radial-item {
   position: absolute;
   width: 1px;
@@ -658,9 +660,6 @@
 }
 .mobile-radial-wrap.is-open .mobile-radial-item {
   transform: translate(-50%, -50%) scale(1);
-}
-.mobile-radial-wrap.is-open .mobile-radial-bubble {
-  opacity: 1;
 }
 .mobile-radial-bubble {
   position: absolute;
@@ -689,6 +688,7 @@
   pointer-events: auto;
   transition: background .2s ease, color .2s ease, box-shadow .2s ease;
 }
+.mobile-radial-wrap.is-open .mobile-radial-bubble { opacity: 1; }
 .mobile-radial-icon {
   display: block;
   width: 17px;
@@ -711,66 +711,118 @@
   outline: none;
   box-shadow: 4px 5px 0 var(--color-ink);
 }
-.mobile-radial-wrap.is-open .mobile-radial-child-toggle {
-  opacity: 1;
-}
+
+/* The chevron gets its own little satellite position, so it never sits on the label. */
 .mobile-radial-child-toggle {
   position: absolute;
-  right: -8px;
-  top: -8px;
+  right: -13px;
+  top: -13px;
+  z-index: 3;
   display: grid;
-  width: 21px;
-  height: 21px;
+  width: 24px;
+  height: 24px;
   place-items: center;
-  border: 1px solid rgb(28 33 70 / .16);
+  border: 1px solid rgb(28 33 70 / .15);
   border-radius: 50%;
   background: var(--color-paper);
   color: var(--color-ink);
   opacity: 0;
   pointer-events: auto;
   box-shadow: 2px 2px 0 rgb(28 33 70 / .08);
-  transition: opacity .2s ease, transform .25s ease;
+  transition: opacity .2s ease, transform .25s ease, background .2s ease;
 }
 .mobile-radial-wrap.is-open .mobile-radial-child-toggle { opacity: 1; }
+.mobile-radial-child-toggle:hover { background: var(--color-saffron); }
 
-.mobile-radial-subitem {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  transform: translate(-50%, -50%) scale(.35);
-  transition: transform .5s cubic-bezier(.22,1,.36,1);
-  transition-delay: var(--radial-delay);
+/* Submenus deliberately leave the radial cluster and occupy the lower screen.
+   Grid columns adapt to the number of children and the actual phone width. */
+.mobile-radial-submenu-panel {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  top: 49vh;
+  z-index: 5;
+  padding: 12px 12px 14px;
+  border: 1px solid rgb(28 33 70 / .13);
+  border-radius: 20px;
+  background: rgb(251 246 234 / .97);
+  box-shadow: 5px 6px 0 rgb(28 33 70 / .11);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateY(28px) scale(.96);
+  transition: opacity .3s ease, transform .5s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.mobile-radial-wrap.is-open .mobile-radial-submenu-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.mobile-radial-submenu-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 4px 10px;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.mobile-radial-submenu-label span:last-child {
+  color: rgb(28 33 70 / .38);
+  font-size: .48rem;
+}
+.mobile-radial-submenu-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--sub-count), minmax(0, 1fr));
+  gap: 9px;
 }
 .mobile-radial-sub-bubble {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -50%);
-  min-width: 92px;
-  padding: 8px 10px;
+  min-width: 0;
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 7px;
   border: 1px solid rgb(28 33 70 / .14);
-  border-radius: 999px;
-  background: rgb(245 236 217 / .98);
+  border-radius: 14px;
+  background: var(--color-paper);
   color: var(--color-ink);
-  font-size: .62rem;
-  font-weight: 650;
+  box-shadow: 2px 3px 0 rgb(28 33 70 / .08);
+  font-size: clamp(.58rem, 2.4vw, .72rem);
+  font-weight: 700;
+  line-height: 1.15;
   text-align: center;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: auto;
-  box-shadow: 2px 3px 0 rgb(28 33 70 / .10);
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
 }
-.mobile-radial-wrap.is-open .mobile-radial-subitem { transform: translate(-50%, -50%) scale(1); }
-.mobile-radial-wrap.is-open .mobile-radial-sub-bubble { opacity: 1; }
+.mobile-radial-sub-bubble:hover,
+.mobile-radial-sub-bubble:focus-visible {
+  background: var(--color-saffron);
+  color: var(--color-ink);
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 3px 4px 0 var(--color-ink);
+}
 
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .mobile-radial-orbit { right: .9rem; }
   .mobile-radial-bubble { width: 56px; height: 56px; font-size: .47rem; }
-  .mobile-radial-icon { width: 15px; height: 15px; }
+  .mobile-radial-icon { width: 15px; height: 15px; flex-basis: 15px; }
+  .mobile-radial-child-toggle { right: -11px; top: -11px; width: 22px; height: 22px; }
+  .mobile-radial-submenu-panel { left: 9px; right: 9px; }
+  .mobile-radial-submenu-grid { gap: 6px; }
+}
+@media (max-width: 330px) {
+  .mobile-radial-submenu-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-radial-submenu-grid .mobile-radial-sub-bubble:last-child {
+    grid-column: 1 / -1;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-radial-item,
-  .mobile-radial-subitem,
   .mobile-radial-ring,
+  .mobile-radial-submenu-panel,
   .mobile-menu-button { transition-duration: 0ms !important; }
 }
