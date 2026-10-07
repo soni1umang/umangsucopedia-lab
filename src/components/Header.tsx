@@ -224,6 +224,7 @@ function MobileRadialMenu({
                 <button
                   type="button"
                   className="mobile-radial-child-toggle"
+                  style={{ ['--toggle-side' as string]: index < 3 ? 'left' : 'right' }}
                   aria-label={`${activeChildren?.to === item.to ? 'Hide' : 'Show'} ${item.label} sub-menu`}
                   onClick={(event) => {
                     event.stopPropagation()
