@@ -142,7 +142,7 @@ function Category() {
       <section className="container-uco pt-12">
         {postList.length ? (
           <>
-            {pinnedIds.length > 0 && (
+            {postList.some((p: any) => !pinnedIds.includes(Number(p.id))) && pinnedIds.length > 0 && (
               <div className="mb-6 flex items-center gap-3 border-b border-ink/10 pb-3">
                 <p className="eyebrow">All posts</p>
                 <span className="font-mono text-[.58rem] text-ink/30">excluding pinned</span>
