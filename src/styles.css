@@ -328,3 +328,95 @@
   .cat-message { animation: none !important; }
   .house-cat { transition-duration: 0ms !important; }
 }
+
+
+/* Quiet floating build/status note on the homepage. */
+.site-status {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px 15px 13px;
+  border: 1px solid rgb(28 33 70 / .12);
+  border-radius: 16px;
+  background: rgb(245 236 217 / .94);
+  color: var(--color-ink);
+  box-shadow: 5px 6px 0 rgb(28 33 70 / .07);
+  backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  pointer-events: auto;
+}
+.site-status-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgb(28 33 70 / .46);
+  font-size: .56rem;
+  line-height: 1;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.site-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-leaf);
+  box-shadow: 0 0 0 3px rgb(95 124 83 / .1);
+}
+.site-status-code {
+  margin-left: auto;
+  color: rgb(28 33 70 / .3);
+}
+.site-status-title {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+  letter-spacing: -.02em;
+}
+.site-status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 14px;
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(28 33 70 / .09);
+}
+.site-status-grid div {
+  min-width: 0;
+}
+.site-status-grid span {
+  display: block;
+  margin-bottom: 3px;
+  color: rgb(28 33 70 / .38);
+  font-size: .48rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.site-status-grid strong {
+  display: block;
+  overflow: hidden;
+  color: rgb(28 33 70 / .68);
+  font-size: .58rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-status-message {
+  overflow: hidden;
+  margin: 10px 0 0;
+  color: rgb(28 33 70 / .42);
+  font-size: .5rem;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .site-status {
+    right: 12px;
+    bottom: 12px;
+    width: min(290px, calc(100vw - 24px));
+    padding: 12px 13px;
+  }
+}
