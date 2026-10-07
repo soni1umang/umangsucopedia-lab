@@ -1,7 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import { ChevronDown, ChevronRight, Menu, PenLine, X } from 'lucide-react'
-import { site } from '@/config/site'
+import {
+  ChevronDown,
+  ChevronRight,
+  CircleHelp,
+  Contact,
+  FlaskConical,
+  Gamepad2,
+  Github,
+  Home,
+  Images,
+  Info,
+  Mail,
+  Menu,
+  Microscope,
+  PenLine,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import { useSiteSettings } from '@/lib/site-context'
 
 import { SocialLinks } from './SocialIcons'
@@ -104,47 +120,128 @@ function Flyout({ items, depth = 0 }: { items: NavItem[]; depth?: number }) {
   )
 }
 
-function MobileItem({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
-  const [open, setOpen] = useState(false)
-  const hasChildren = !!item.children?.length
+const menuIcons = {
+  Home,
+  Read: Sparkles,
+  Research: Microscope,
+  Make: Gamepad2,
+  Now: CircleHelp,
+  About: Info,
+  Contact: Mail,
+} as const
+
+function MobileRadialMenu({
+  nav,
+  open,
+  onClose,
+  pathname,
+}: {
+  nav: NavItem[]
+  open: boolean
+  onClose: () => void
+  pathname: string
+}) {
+  const visible = nav.filter((item) => ['Home', 'Read', 'Research', 'Make', 'Now', 'About', 'Contact'].includes(item.label))
+  const [activeChildren, setActiveChildren] = useState<NavItem | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      const t = window.setTimeout(() => setActiveChildren(null), 260)
+      return () => window.clearTimeout(t)
+    }
+  }, [open])
+
+  const handleNavigate = () => {
+    setActiveChildren(null)
+    onClose()
+  }
+
   return (
-    <li>
-      <div className="flex items-center">
-        {item.href ? (
-          <a href={item.href} target="_blank" rel="noreferrer" onClick={onNavigate} className="flex-1 py-2.5 text-ink/85">
-            {item.label}
-          </a>
-        ) : (
-          <Link
-            to={item.to}
-            onClick={onNavigate}
-            className="flex-1 py-2.5 text-ink/85"
-            activeOptions={{ exact: true }}
-            activeProps={{ className: 'font-semibold text-terracotta' }}
-          >
-            {item.label}
-          </Link>
-        )}
-        {hasChildren && (
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-label={`${open ? 'Collapse' : 'Expand'} ${item.label}`}
-            aria-expanded={open}
-            className="grid size-9 place-items-center rounded-full hover:bg-paper-deep"
-          >
-            <ChevronDown className={cn('size-4 transition', open && 'rotate-180')} />
-          </button>
-        )}
+    <div
+      className={cn('mobile-radial-wrap lg:hidden', open ? 'is-open' : 'is-closed')}
+      aria-hidden={!open}
+    >
+      <div
+        className="mobile-radial-scrim"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div className="mobile-radial-orbit" aria-label="Quick navigation">
+        <div className="mobile-radial-ring mobile-radial-ring-a" />
+        <div className="mobile-radial-ring mobile-radial-ring-b" />
+
+        {visible.map((item, index) => {
+          const Icon = menuIcons[item.label as keyof typeof menuIcons] ?? CircleHelp
+          const active = isActive(pathname, item.to)
+          const angle = 198 + index * 24.5
+          const hasChildren = !!item.children?.length
+
+          return (
+            <div
+              key={item.to}
+              className="mobile-radial-item"
+              style={{ ['--radial-angle' as string]: `${angle}deg`, ['--radial-delay' as string]: `${index * 35}ms` }}
+            >
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn('mobile-radial-bubble', active && 'is-active')}
+                  onClick={handleNavigate}
+                >
+                  <Icon className="size-4" />
+                  <span>{item.label}</span>
+                </a>
+              ) : (
+                <Link
+                  to={item.to}
+                  className={cn('mobile-radial-bubble', active && 'is-active')}
+                  onClick={handleNavigate}
+                >
+                  <Icon className="size-4" />
+                  <span>{item.label}</span>
+                </Link>
+              )}
+
+              {hasChildren && (
+                <button
+                  type="button"
+                  className="mobile-radial-child-toggle"
+                  aria-label={`${activeChildren?.to === item.to ? 'Hide' : 'Show'} ${item.label} sub-menu`}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setActiveChildren(activeChildren?.to === item.to ? null : item)
+                  }}
+                >
+                  <ChevronRight className={cn('size-3 transition-transform', activeChildren?.to === item.to && 'rotate-90')} />
+                </button>
+              )}
+            </div>
+          )
+        })}
+
+        {activeChildren?.children?.map((child, index) => {
+          const angle = 218 + index * 22
+          return (
+            <div
+              key={child.to}
+              className="mobile-radial-subitem"
+              style={{ ['--sub-angle' as string]: `${angle}deg`, ['--radial-delay' as string]: `${index * 35}ms` }}
+            >
+              <Link
+                to={child.to}
+                className="mobile-radial-sub-bubble"
+                onClick={handleNavigate}
+              >
+                {child.label}
+              </Link>
+            </div>
+          )
+        })}
       </div>
-      {hasChildren && open && (
-        <ul className="ml-3 border-l border-dashed border-ink/20 pl-4">
-          {item.children!.map((c) => (
-            <MobileItem key={c.to} item={c} onNavigate={onNavigate} />
-          ))}
-        </ul>
-      )}
-    </li>
+    </div>
   )
 }
 
@@ -164,6 +261,9 @@ export function Header({ nav }: { nav: NavItem[] }) {
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [mobileOpen])
 
   return (
@@ -182,7 +282,8 @@ export function Header({ nav }: { nav: NavItem[] }) {
             <span className="block font-display text-xl font-semibold tracking-tight text-ink">{settings.name}<span className="text-terracotta">.</span><span className="ml-1 font-mono text-[.62rem] font-semibold uppercase tracking-[.18em] text-terracotta">lab</span></span>
             <span className="mt-1 hidden font-mono text-[.48rem] uppercase tracking-[.24em] text-ink/35 sm:block">the curious laboratory</span>
           </span>
-        </Link>    <nav aria-label="Main" className="ml-auto hidden lg:block">
+        </Link>
+        <nav aria-label="Main" className="ml-auto hidden lg:block">
           <ul className="flex items-center gap-0.5">
             {nav.map((item) => (
               <li key={item.to} className="group relative">
@@ -216,41 +317,17 @@ export function Header({ nav }: { nav: NavItem[] }) {
           )}
           <button
             type="button"
-            className="grid size-10 place-items-center rounded-full border border-ink/15 lg:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+            className={cn('mobile-menu-button lg:hidden', mobileOpen && 'is-open')}
+            onClick={() => setMobileOpen((value) => !value)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
           >
-            <Menu className="size-5" />
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-ink/40 animate-in fade-in" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-paper shadow-2xl animate-in slide-in-from-right">
-            <div className="flex h-16 items-center justify-between border-b border-ink/10 px-5">
-              <span className="font-display text-lg font-semibold">Menu</span>
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                className="grid size-10 place-items-center rounded-full hover:bg-paper-deep"
-                aria-label="Close menu"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-            <ul className="flex-1 overflow-y-auto px-5 py-3">
-              {nav.map((item) => (
-                <MobileItem key={item.to} item={item} onNavigate={() => setMobileOpen(false)} />
-              ))}
-            </ul>
-            <div className="border-t border-ink/10 px-4 py-4">
-              <SocialLinks className="flex-wrap" links={settings.socials} />
-            </div>
-          </div>
-        </div>
-      )}
+      <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />
     </header>
   )
 }
