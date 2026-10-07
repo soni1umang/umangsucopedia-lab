@@ -4,12 +4,8 @@ import {
   ChevronDown,
   ChevronRight,
   CircleHelp,
-  Contact,
-  FlaskConical,
   Gamepad2,
-  Github,
   Home,
-  Images,
   Info,
   Mail,
   Menu,
@@ -143,6 +139,14 @@ function MobileRadialMenu({
 }) {
   const visible = nav.filter((item) => ['Home', 'Read', 'Research', 'Make', 'Now', 'About', 'Contact'].includes(item.label))
   const [activeChildren, setActiveChildren] = useState<NavItem | null>(null)
+  const [viewportWidth, setViewportWidth] = useState(390)
+
+  useEffect(() => {
+    const update = () => setViewportWidth(window.innerWidth)
+    update()
+    window.addEventListener('resize', update, { passive: true })
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   useEffect(() => {
     if (!open) {
@@ -156,32 +160,43 @@ function MobileRadialMenu({
     onClose()
   }
 
-  return (
-    <div
-      className={cn('mobile-radial-wrap lg:hidden', open ? 'is-open' : 'is-closed')}
-      aria-hidden={!open}
-    >
-      <div
-        className="mobile-radial-scrim"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+  // The menu is laid out from the actual viewport width instead of fixed
+  // percentages. This keeps the fan usable on both narrow and wide phones.
+  const radius = Math.min(320, Math.max(225, viewportWidth * 0.72))
+  const startAngle = 95
+  const endAngle = 175
+  const angleStep = visible.length > 1 ? (endAngle - startAngle) / (visible.length - 1) : 0
 
-      <div className="mobile-radial-orbit" aria-label="Quick navigation">
+  return (
+    <div className={cn('mobile-radial-wrap lg:hidden', open ? 'is-open' : 'is-closed')} aria-hidden={!open}>
+      <div className="mobile-radial-scrim" onClick={onClose} aria-hidden="true" />
+
+      <div
+        className="mobile-radial-orbit"
+        aria-label="Quick navigation"
+        style={{ ['--radial-radius' as string]: `${radius}px` }}
+      >
         <div className="mobile-radial-ring mobile-radial-ring-a" />
         <div className="mobile-radial-ring mobile-radial-ring-b" />
 
         {visible.map((item, index) => {
           const Icon = menuIcons[item.label as keyof typeof menuIcons] ?? CircleHelp
           const active = isActive(pathname, item.to)
-          const angle = 102 + index * 13.5
+          const angle = startAngle + index * angleStep
+          const radians = angle * Math.PI / 180
+          const x = Math.cos(radians) * radius
+          const y = Math.sin(radians) * radius
           const hasChildren = !!item.children?.length
 
           return (
             <div
               key={item.to}
               className="mobile-radial-item"
-              style={{ ['--radial-angle' as string]: `${angle}deg`, ['--radial-delay' as string]: `${index * 35}ms` }}
+              style={{
+                left: `${x}px`,
+                top: `${y}px`,
+                ['--radial-delay' as string]: `${index * 42}ms`,
+              }}
             >
               {item.href ? (
                 <a
@@ -191,7 +206,7 @@ function MobileRadialMenu({
                   className={cn('mobile-radial-bubble', active && 'is-active')}
                   onClick={handleNavigate}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="mobile-radial-icon" />
                   <span>{item.label}</span>
                 </a>
               ) : (
@@ -200,7 +215,7 @@ function MobileRadialMenu({
                   className={cn('mobile-radial-bubble', active && 'is-active')}
                   onClick={handleNavigate}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="mobile-radial-icon" />
                   <span>{item.label}</span>
                 </Link>
               )}
@@ -223,18 +238,19 @@ function MobileRadialMenu({
         })}
 
         {activeChildren?.children?.map((child, index) => {
-          const angle = 108 + index * 16
+          const subRadius = Math.min(135, Math.max(105, viewportWidth * 0.30))
+          const subAngle = 105 + index * Math.min(18, 55 / Math.max(1, activeChildren.children!.length - 1))
+          const radians = subAngle * Math.PI / 180
+          const x = Math.cos(radians) * subRadius
+          const y = Math.sin(radians) * subRadius
+
           return (
             <div
               key={child.to}
               className="mobile-radial-subitem"
-              style={{ ['--sub-angle' as string]: `${angle}deg`, ['--radial-delay' as string]: `${index * 35}ms` }}
+              style={{ left: `${x}px`, top: `${y}px`, ['--radial-delay' as string]: `${index * 35}ms` }}
             >
-              <Link
-                to={child.to}
-                className="mobile-radial-sub-bubble"
-                onClick={handleNavigate}
-              >
+              <Link to={child.to} className="mobile-radial-sub-bubble" onClick={handleNavigate}>
                 {child.label}
               </Link>
             </div>
