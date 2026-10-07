@@ -174,7 +174,7 @@ function MobileRadialMenu({
         {visible.map((item, index) => {
           const Icon = menuIcons[item.label as keyof typeof menuIcons] ?? CircleHelp
           const active = isActive(pathname, item.to)
-          const angle = 198 + index * 24.5
+          const angle = 102 + index * 13.5
           const hasChildren = !!item.children?.length
 
           return (
@@ -223,7 +223,7 @@ function MobileRadialMenu({
         })}
 
         {activeChildren?.children?.map((child, index) => {
-          const angle = 218 + index * 22
+          const angle = 108 + index * 16
           return (
             <div
               key={child.to}
