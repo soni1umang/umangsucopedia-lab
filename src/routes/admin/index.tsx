@@ -27,7 +27,7 @@ function Admin() {
   async function load() {
     if (!user) return
     const [p,c] = await Promise.all([
-      supabase.from('posts').select('*,category:categories(name)').order('updated_at',{ascending:false}),
+      supabase.from('posts').select('*,category:categories!posts_category_id_fkey(name)').order('updated_at',{ascending:false}),
       supabase.from('categories').select('*').order('sort_order').order('name'),
     ])
     setPosts(p.data ?? [])
