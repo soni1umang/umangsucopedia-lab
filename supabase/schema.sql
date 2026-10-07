@@ -4,3 +4,6 @@ create policy "public read blog images" on storage.objects for select using(buck
 create policy "admin upload blog images" on storage.objects for insert to authenticated with check(bucket_id='blog-images' and public.is_admin());
 create policy "admin update blog images" on storage.objects for update to authenticated using(bucket_id='blog-images' and public.is_admin()) with check(bucket_id='blog-images' and public.is_admin());
 create policy "admin delete blog images" on storage.objects for delete to authenticated using(bucket_id='blog-images' and public.is_admin());
+
+
+create table if not exists public.category_post_pins(category_id bigint not null references public.categories(id) on delete cascade,post_id bigint not null references public.posts(id) on delete cascade,position int not null default 0,created_at timestamptz not null default now(),primary key(category_id,post_id));create index if not exists category_post_pins_category_position_idx on public.category_post_pins(category_id,position);alter table public.category_post_pins enable row level security;create policy "public read category post pins" on public.category_post_pins for select using(true);create policy "admin write category post pins" on public.category_post_pins for all using(public.is_admin()) with check(public.is_admin());

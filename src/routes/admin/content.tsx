@@ -217,6 +217,7 @@ function SiteSettingsEditor({value,setValue}:{value:SiteSettings;setValue:Dispat
     <Card title='Identity'><div className='grid gap-5 md:grid-cols-2'><Field label='Site name'><TextInput value={value.name} onChange={e=>set({name:e.target.value})}/></Field><Field label='Owner name'><TextInput value={value.owner} onChange={e=>set({owner:e.target.value})}/></Field><Field label='Browser / page title'><TextInput value={value.title} onChange={e=>set({title:e.target.value})}/></Field><Field label='Tagline'><TextInput value={value.tagline} onChange={e=>set({tagline:e.target.value})}/></Field></div><div className='mt-5'><Field label='Site description'><TextArea rows={4} value={value.description} onChange={e=>set({description:e.target.value})}/></Field></div></Card>
     <Card title='Academic profile link'><div className='grid gap-5 md:grid-cols-2'><Field label='Button label'><TextInput value={value.academic_portfolio_label} onChange={e=>set({academic_portfolio_label:e.target.value})} placeholder='Full Academic Profile'/></Field><Field label='External profile URL'><TextInput value={value.academic_portfolio_url} onChange={e=>set({academic_portfolio_url:e.target.value})} placeholder='https://…'/></Field></div><p className='mt-3 text-xs text-ink/50'>This creates a prominent button in Academia that opens your external academic profile in a new tab.</p></Card>
     <Card title='Contact'><div className='grid gap-5 md:grid-cols-2'><Field label='Email'><TextInput type='email' value={value.email} onChange={e=>set({email:e.target.value})}/></Field><Field label='Location'><TextInput value={value.location} onChange={e=>set({location:e.target.value})}/></Field></div></Card>
+    <CategorySpotlightEditor />
     <Card title='Social profiles' actions={<button type='button' className='btn-saffron !px-3 !py-2 text-sm' onClick={addSocial}><Plus className='size-4'/> Add profile</button>}>
       <p className='mb-5 text-sm text-ink/55'>You can have more than one account on the same platform. For example, two Instagram accounts.</p>
       <div className='space-y-4'>{value.socials.map((s,i)=><div key={s.key} className='rounded-xl border border-ink/10 bg-paper p-4'>
@@ -229,6 +230,218 @@ function SiteSettingsEditor({value,setValue}:{value:SiteSettings;setValue:Dispat
       </div>)}</div>
     </Card>
   </div>
+}
+
+type PinCategory = { id:number; slug:string; name:string; parent_id:number|null; sort_order:number }
+type PinPost = { id:number; title:string; slug:string; category_id:number|null; published_at:string|null }
+
+function pinDescendantIds(all: PinCategory[], root: number) {
+  const ids = [root]
+  for (let i = 0; i < ids.length; i++) {
+    for (const category of all) {
+      if (category.parent_id === ids[i] && !ids.includes(category.id)) ids.push(category.id)
+    }
+  }
+  return ids
+}
+
+function CategorySpotlightEditor() {
+  const [categories, setCategories] = useState<PinCategory[]>([])
+  const [posts, setPosts] = useState<PinPost[]>([])
+  const [categoryId, setCategoryId] = useState<number | null>(null)
+  const [pinned, setPinned] = useState<number[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      setError('')
+      const [categoryResult, postResult] = await Promise.all([
+        supabase.from('categories').select('id,slug,name,parent_id,sort_order').order('sort_order'),
+        supabase.from('posts').select('id,title,slug,category_id,published_at').eq('status','published').order('published_at',{ascending:false}),
+      ])
+      if (cancelled) return
+      if (categoryResult.error || postResult.error) {
+        setError('Could not load categories/posts. If this is a new feature, run supabase/migration_v3_category_pins.sql first.')
+        setLoading(false)
+        return
+      }
+      const nextCategories = (categoryResult.data ?? []) as PinCategory[]
+      setCategories(nextCategories)
+      setPosts((postResult.data ?? []) as PinPost[])
+      setCategoryId(nextCategories[0]?.id ?? null)
+      setLoading(false)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (!categoryId) {
+      setPinned([])
+      return
+    }
+    let cancelled = false
+    setMessage('')
+    supabase
+      .from('category_post_pins')
+      .select('post_id,position')
+      .eq('category_id', categoryId)
+      .order('position',{ascending:true})
+      .then(({ data, error: queryError }) => {
+        if (cancelled) return
+        if (queryError) {
+          setError('Pinned posts are not available yet. Run the v3 migration in Supabase.')
+          setPinned([])
+          return
+        }
+        setPinned((data ?? []).map((row:any) => Number(row.post_id)))
+      })
+    return () => { cancelled = true }
+  }, [categoryId])
+
+  const selectedCategory = categories.find((category) => category.id === categoryId)
+  const allowedIds = selectedCategory ? new Set(pinDescendantIds(categories, selectedCategory.id)) : new Set<number>()
+  const available = posts.filter((post) => post.category_id != null && allowedIds.has(post.category_id) && !pinned.includes(post.id))
+  const pinnedPosts = pinned.map((id) => posts.find((post) => post.id === id)).filter(Boolean) as PinPost[]
+
+  function pinPost(id:number) {
+    if (pinned.length >= 6 || pinned.includes(id)) return
+    setPinned((current) => [...current, id])
+    setMessage('')
+  }
+
+  function unpinPost(id:number) {
+    setPinned((current) => current.filter((value) => value !== id))
+    setMessage('')
+  }
+
+  function movePinned(index:number, direction:number) {
+    setPinned((current) => {
+      const next = [...current]
+      const target = index + direction
+      if (target < 0 || target >= next.length) return current
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }
+
+  async function savePins() {
+    if (!categoryId) return
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const remove = await supabase.from('category_post_pins').delete().eq('category_id', categoryId)
+      if (remove.error) throw remove.error
+      if (pinned.length) {
+        const insert = await supabase.from('category_post_pins').insert(
+          pinned.map((postId, position) => ({ category_id: categoryId, post_id: postId, position }))
+        )
+        if (insert.error) throw insert.error
+      }
+      setMessage(`Saved ${pinned.length} pinned post${pinned.length === 1 ? '' : 's'} for ${selectedCategory?.name ?? 'this category'}.`)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not save pinned posts.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function categoryLabel(category: PinCategory) {
+    const parts:string[] = []
+    let current: PinCategory | undefined = category
+    while (current) {
+      parts.unshift(current.name)
+      current = categories.find((item) => item.id === current?.parent_id)
+    }
+    return parts.join(' / ')
+  }
+
+  return (
+    <Card title='Category spotlights'>
+      <p className='max-w-2xl text-sm leading-6 text-ink/60'>
+        Pin a small set of posts for any category or sub-category. Pinned posts appear first on that category page, while the normal post list stays underneath. You can feature up to 6 posts per category.
+      </p>
+
+      {loading ? (
+        <p className='mt-5 text-sm text-ink/50'>Loading categories and published posts…</p>
+      ) : error ? (
+        <p className='mt-5 rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta'>{error}</p>
+      ) : (
+        <div className='mt-6 space-y-5'>
+          <Field label='Category / sub-category'>
+            <select
+              className='field w-full'
+              value={categoryId ?? ''}
+              onChange={(event) => setCategoryId(Number(event.target.value))}
+            >
+              {categories.map((category) => <option key={category.id} value={category.id}>{categoryLabel(category)}</option>)}
+            </select>
+          </Field>
+
+          <div className='grid gap-5 lg:grid-cols-2'>
+            <div className='rounded-xl border border-ink/10 bg-paper p-4'>
+              <div className='mb-3 flex items-center justify-between gap-3'>
+                <div>
+                  <p className='font-semibold'>Pinned for this page</p>
+                  <p className='text-xs text-ink/45'>{pinned.length}/6 featured</p>
+                </div>
+                <span className='font-mono text-[.58rem] uppercase tracking-widest text-terracotta'>priority</span>
+              </div>
+              {pinnedPosts.length ? (
+                <div className='space-y-2'>
+                  {pinnedPosts.map((post,index) => (
+                    <div key={post.id} className='flex items-center gap-2 rounded-lg border border-ink/10 bg-card p-2.5'>
+                      <span className='w-5 shrink-0 text-center font-mono text-xs text-ink/35'>{index+1}</span>
+                      <span className='min-w-0 flex-1 truncate text-sm font-medium'>{post.title}</span>
+                      <button type='button' className='grid size-8 place-items-center rounded-lg border border-ink/10 hover:bg-paper-deep disabled:opacity-30' onClick={()=>movePinned(index,-1)} disabled={index===0} aria-label='Move pinned post up'><ArrowUp className='size-3.5'/></button>
+                      <button type='button' className='grid size-8 place-items-center rounded-lg border border-ink/10 hover:bg-paper-deep disabled:opacity-30' onClick={()=>movePinned(index,1)} disabled={index===pinnedPosts.length-1} aria-label='Move pinned post down'><ArrowDown className='size-3.5'/></button>
+                      <button type='button' className='grid size-8 place-items-center rounded-lg border border-ink/10 text-terracotta hover:bg-terracotta/10' onClick={()=>unpinPost(post.id)} aria-label='Remove pinned post'><Trash2 className='size-3.5'/></button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className='rounded-lg border border-dashed border-ink/15 p-5 text-center text-sm text-ink/45'>No pinned posts yet.</p>
+              )}
+            </div>
+
+            <div className='rounded-xl border border-ink/10 bg-paper p-4'>
+              <div className='mb-3'>
+                <p className='font-semibold'>Published posts you can pin</p>
+                <p className='text-xs text-ink/45'>Includes posts from this category and its sub-categories.</p>
+              </div>
+              {available.length ? (
+                <div className='max-h-72 space-y-2 overflow-y-auto pr-1'>
+                  {available.map((post) => (
+                    <button key={post.id} type='button' className='flex w-full items-center gap-3 rounded-lg border border-ink/10 bg-card p-3 text-left transition hover:border-terracotta/40 hover:bg-paper-deep disabled:cursor-not-allowed disabled:opacity-40' onClick={()=>pinPost(post.id)} disabled={pinned.length>=6}>
+                      <Plus className='size-4 shrink-0 text-terracotta'/>
+                      <span className='min-w-0 flex-1 truncate text-sm'>{post.title}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className='rounded-lg border border-dashed border-ink/15 p-5 text-center text-sm text-ink/45'>No additional published posts are available for this category.</p>
+              )}
+            </div>
+          </div>
+
+          <div className='flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ink/10 bg-card p-3'>
+            <p className='text-xs text-ink/50'>Choose a category, arrange the featured posts, then save. Changes affect only that category page.</p>
+            <button type='button' className='btn-saffron !px-4 !py-2 text-sm' onClick={()=>void savePins()} disabled={saving || !categoryId}>
+              <Save className='size-4'/>{saving ? 'Saving…' : 'Save pinned posts'}
+            </button>
+          </div>
+
+          {(message || error) && <p className={`rounded-lg px-4 py-3 text-sm ${error ? 'bg-terracotta/10 text-terracotta' : 'bg-saffron/35'}`}>{error || message}</p>}
+        </div>
+      )}
+    </Card>
+  )
 }
 
 function AboutEditor({value,setValue}:{value:AboutContent;setValue:Dispatch<SetStateAction<unknown>>}) {
