@@ -88,6 +88,5 @@ export function Editor({id}:Props){
   </div>
   <div className="sticky bottom-4 z-30 mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink/15 bg-card/95 p-3 shadow-xl backdrop-blur"><p className="text-sm text-ink/60">{status==='published'?'Published post':'Draft'}{title.trim()? ` · ${title.trim()}`:''}</p><div className="flex gap-2"><button type="button" className="btn-ghost" disabled={busy||uploading} onClick={()=>void save('draft')}><Save className="size-4"/> Save draft</button><button type="button" className="btn-saffron" disabled={busy||uploading} onClick={()=>void save('published')}>{busy?<LoaderCircle className="size-4 animate-spin"/>:null}{status==='published'?'Update post':'Publish'}</button></div></div>
   {(error||notice)&&<p role={error?'alert':'status'} className={`mt-5 rounded-lg px-4 py-3 text-sm ${error?'bg-terracotta/10 text-terracotta':'bg-saffron/50'}`}>{error||notice}</p>}
-  </div>
  </form>
 }
