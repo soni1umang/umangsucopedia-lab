@@ -47,6 +47,6 @@ export function categoryPostCount(all:any[], posts:any[], categoryId:any) {
 }
 
 export async function categories(){const{data,error}=await supabase.from('categories').select('*').order('sort_order');if(error)throw error;return data??[]}
-export async function posts(){const{data,error}=await supabase.from('posts').select('*,category:categories(*)').eq('status','published').order('published_at',{ascending:false});if(error)throw error;return data??[]}
-export async function post(slug:string){const{data,error}=await supabase.from('posts').select('*,category:categories(*)').eq('slug',slug).maybeSingle();if(error)throw error;return data}
-export async function adminPosts(){const{data,error}=await supabase.from('posts').select('*,category:categories(*)').order('updated_at',{ascending:false});if(error)throw error;return data??[]}
+export async function posts(){const{data,error}=await supabase.from('posts').select('*,category:categories!posts_category_id_fkey(*)').eq('status','published').order('published_at',{ascending:false});if(error)throw error;return data??[]}
+export async function post(slug:string){const{data,error}=await supabase.from('posts').select('*,category:categories!posts_category_id_fkey(*)').eq('slug',slug).maybeSingle();if(error)throw error;return data}
+export async function adminPosts(){const{data,error}=await supabase.from('posts').select('*,category:categories!posts_category_id_fkey(*)').order('updated_at',{ascending:false});if(error)throw error;return data??[]}
