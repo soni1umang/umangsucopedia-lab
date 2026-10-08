@@ -170,15 +170,21 @@ function MobileRadialMenu({
   const submenu =
     open && activeChildren?.children?.length
       ? (
-        <div className="mobile-radial-submenu-panel" role="dialog" aria-label={`${activeChildren.label} submenu`}>
-          <div className="mobile-radial-submenu-label">
-            <span>{activeChildren.label}</span>
-            <span>choose a section</span>
-          </div>
-          <div className="mobile-radial-submenu-grid">
-            {activeChildren.children.map((child) => (
-              <Link key={child.to} to={child.to} className="mobile-radial-sub-bubble" onClick={handleNavigate}>
-                {child.label}
+        <div
+          className="mobile-radial-submenu-panel"
+          role="dialog"
+          aria-label={`${activeChildren.label} submenu`}
+        >
+          <div className="mobile-radial-submenu-rail">
+            {activeChildren.children.map((child, index) => (
+              <Link
+                key={child.to}
+                to={child.to}
+                className="mobile-radial-sub-bubble"
+                style={{ ['--sub-delay' as string]: `${index * 55}ms` }}
+                onClick={handleNavigate}
+              >
+                <span>{child.label}</span>
               </Link>
             ))}
           </div>
