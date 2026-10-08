@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
   ChevronDown,
@@ -160,56 +161,66 @@ function MobileRadialMenu({
     onClose()
   }
 
-  // The menu is laid out from the actual viewport width instead of fixed
-  // percentages. This keeps the fan usable on both narrow and wide phones.
+  // Geometry is calculated from the actual viewport width.
   const radius = Math.min(320, Math.max(225, viewportWidth * 0.72))
   const startAngle = 95
   const endAngle = 175
   const angleStep = visible.length > 1 ? (endAngle - startAngle) / (visible.length - 1) : 0
 
+  const submenu =
+    open && activeChildren?.children?.length
+      ? (
+        <div className="mobile-radial-submenu-panel" role="dialog" aria-label={`${activeChildren.label} submenu`}>
+          <div className="mobile-radial-submenu-label">
+            <span>{activeChildren.label}</span>
+            <span>choose a section</span>
+          </div>
+          <div className="mobile-radial-submenu-grid">
+            {activeChildren.children.map((child) => (
+              <Link key={child.to} to={child.to} className="mobile-radial-sub-bubble" onClick={handleNavigate}>
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )
+      : null
+
   return (
-    <div className={cn('mobile-radial-wrap lg:hidden', open ? 'is-open' : 'is-closed')} aria-hidden={!open}>
-      <div className="mobile-radial-scrim" onClick={onClose} aria-hidden="true" />
-
+    <>
       <div
-        className="mobile-radial-orbit"
-        aria-label="Quick navigation"
-        style={{ ['--radial-radius' as string]: `${radius}px` }}
+        className={cn('mobile-radial-wrap lg:hidden', open ? 'is-open' : 'is-closed')}
+        aria-hidden={!open}
       >
-        <div className="mobile-radial-ring mobile-radial-ring-a" />
-        <div className="mobile-radial-ring mobile-radial-ring-b" />
+        <div className="mobile-radial-scrim" onClick={onClose} aria-hidden="true" />
 
-        {visible.map((item, index) => {
-          const Icon = menuIcons[item.label as keyof typeof menuIcons] ?? CircleHelp
-          const active = isActive(pathname, item.to)
-          const angle = startAngle + index * angleStep
-          const radians = angle * Math.PI / 180
-          const x = Math.cos(radians) * radius
-          const y = Math.sin(radians) * radius
-          const hasChildren = !!item.children?.length
+        <div
+          className="mobile-radial-orbit"
+          aria-label="Quick navigation"
+          style={{ ['--radial-radius' as string]: `${radius}px` }}
+        >
+          <div className="mobile-radial-ring mobile-radial-ring-a" />
+          <div className="mobile-radial-ring mobile-radial-ring-b" />
 
-          return (
-            <div
-              key={item.to}
-              className="mobile-radial-item"
-              style={{
-                left: `${x}px`,
-                top: `${y}px`,
-                ['--radial-delay' as string]: `${index * 42}ms`,
-              }}
-            >
-              {item.href ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn('mobile-radial-bubble', active && 'is-active')}
-                  onClick={handleNavigate}
-                >
-                  <Icon className="mobile-radial-icon" />
-                  <span>{item.label}</span>
-                </a>
-              ) : (
+          {visible.map((item, index) => {
+            const Icon = menuIcons[item.label as keyof typeof menuIcons] ?? CircleHelp
+            const active = isActive(pathname, item.to)
+            const angle = startAngle + index * angleStep
+            const radians = angle * Math.PI / 180
+            const x = Math.cos(radians) * radius
+            const y = Math.sin(radians) * radius
+            const hasChildren = !!item.children?.length
+
+            return (
+              <div
+                key={item.to}
+                className="mobile-radial-item"
+                style={{
+                  left: `${x}px`,
+                  top: `${y}px`,
+                  ['--radial-delay' as string]: `${index * 42}ms`,
+                }}
+              >
                 <Link
                   to={item.to}
                   className={cn('mobile-radial-bubble', active && 'is-active')}
@@ -218,45 +229,34 @@ function MobileRadialMenu({
                   <Icon className="mobile-radial-icon" />
                   <span>{item.label}</span>
                 </Link>
-              )}
 
-              {hasChildren && (
-                <button
-                  type="button"
-                  className={cn('mobile-radial-child-toggle', index < 3 ? 'is-left' : 'is-right')}
-                  aria-label={`${activeChildren?.to === item.to ? 'Hide' : 'Show'} ${item.label} sub-menu`}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    setActiveChildren(activeChildren?.to === item.to ? null : item)
-                  }}
-                >
-                  <ChevronRight className={cn('size-3 transition-transform', activeChildren?.to === item.to && 'rotate-90')} />
-                </button>
-              )}
-            </div>
-          )
-        })}
-
-        {activeChildren?.children?.length ? (
-          <div
-            className="mobile-radial-submenu-panel"
-            style={{ ['--sub-count' as string]: String(activeChildren.children.length) }}
-          >
-            <div className="mobile-radial-submenu-label">
-              <span>{activeChildren.label}</span>
-              <span>choose a section</span>
-            </div>
-            <div className="mobile-radial-submenu-grid">
-              {activeChildren.children.map((child) => (
-                <Link key={child.to} to={child.to} className="mobile-radial-sub-bubble" onClick={handleNavigate}>
-                  {child.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+                {hasChildren && (
+                  <button
+                    type="button"
+                    className={cn(
+                      'mobile-radial-child-toggle',
+                      index < 4 ? 'is-outer-left' : 'is-outer-right',
+                    )}
+                    aria-label={`${activeChildren?.to === item.to ? 'Hide' : 'Show'} ${item.label} sub-menu`}
+                    aria-expanded={activeChildren?.to === item.to}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setActiveChildren(activeChildren?.to === item.to ? null : item)
+                    }}
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
-    </div>
+
+      {submenu && typeof document !== 'undefined'
+        ? createPortal(submenu, document.body)
+        : null}
+    </>
   )
 }
 
