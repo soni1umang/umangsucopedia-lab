@@ -583,7 +583,8 @@
 
 
 
-/* Mobile radial navigation */
+
+/* Mobile radial navigation — main radial fan + linear left submenu rail */
 .mobile-menu-button{
   position:relative;z-index:80;display:grid;width:2.75rem;height:2.75rem;place-items:center;
   border:1px solid rgb(28 33 70/.18);border-radius:999px;background:rgb(251 246 234/.92);
@@ -607,21 +608,14 @@
   width:calc(var(--radial-radius)*1.44);height:calc(var(--radial-radius)*1.44);border-style:solid
 }
 .mobile-radial-wrap.is-open .mobile-radial-ring{opacity:1;transform:scale(1)}
-
 .mobile-radial-item{
-  position:absolute;
-  width:clamp(58px,17vw,68px);
-  height:clamp(58px,17vw,68px);
+  position:absolute;width:clamp(58px,17vw,68px);height:clamp(58px,17vw,68px);
   transform:translate(-50%,-50%) scale(.3);
-  transition:transform .62s cubic-bezier(.22,1,.36,1);
-  transition-delay:var(--radial-delay);
-  pointer-events:none;
+  transition:transform .62s cubic-bezier(.22,1,.36,1);transition-delay:var(--radial-delay);pointer-events:none
 }
 .mobile-radial-wrap.is-open .mobile-radial-item{transform:translate(-50%,-50%) scale(1)}
-
 .mobile-radial-bubble{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   border:1px solid rgb(28 33 70/.16);border-radius:50%;background:rgb(251 246 234/.98);
   color:var(--color-ink);box-shadow:3px 4px 0 rgb(28 33 70/.13);
   font-size:clamp(.48rem,2vw,.58rem);font-weight:700;line-height:1;text-align:center;white-space:nowrap;
@@ -631,13 +625,10 @@
 .mobile-radial-icon{display:block;width:17px;height:17px;flex:0 0 17px;stroke:currentColor;stroke-width:2;opacity:1;visibility:visible}
 .mobile-radial-bubble.is-active{background:var(--color-ink);color:var(--color-paper);box-shadow:4px 5px 0 rgb(28 33 70/.22)}
 .mobile-radial-bubble:hover,.mobile-radial-bubble:focus-visible{background:var(--color-saffron);color:var(--color-ink);outline:none}
-
 .mobile-radial-child-toggle{
-  position:absolute;top:50%;z-index:5;
-  width:28px;height:28px;display:grid;place-items:center;
+  position:absolute;top:50%;z-index:5;width:28px;height:28px;display:grid;place-items:center;
   border:1px solid rgb(28 33 70/.18);border-radius:50%;background:var(--color-paper);color:var(--color-ink);
-  box-shadow:2px 3px 0 rgb(28 33 70/.12);
-  opacity:0;pointer-events:auto;transform:translateY(-50%);
+  box-shadow:2px 3px 0 rgb(28 33 70/.12);opacity:0;pointer-events:auto;transform:translateY(-50%);
   transition:opacity .2s ease,background .2s ease,transform .2s ease
 }
 .mobile-radial-wrap.is-open .mobile-radial-child-toggle{opacity:1}
@@ -646,38 +637,44 @@
 .mobile-radial-child-toggle:hover{background:var(--color-saffron)}
 .mobile-radial-child-toggle .size-3\.5{width:14px;height:14px}
 
-/* Portaled submenu: completely independent from the radial orbit, so it can never sit inside the arch. */
+/* Submenu: a vertical stack of the same circular controls, entering from the left edge. */
 .mobile-radial-submenu-panel{
-  position:fixed!important;
-  left:12px!important;right:12px!important;bottom:max(16px,env(safe-area-inset-bottom))!important;
-  top:auto!important;z-index:1000!important;width:auto!important;box-sizing:border-box;
-  padding:14px;border:1px solid rgb(28 33 70/.15);border-radius:22px;
-  background:rgb(251 246 234/.99);box-shadow:6px 7px 0 rgb(28 33 70/.13);
-  backdrop-filter:blur(14px)
+  position:fixed!important;left:12px!important;top:50%!important;bottom:auto!important;right:auto!important;
+  z-index:1000!important;width:clamp(66px,18vw,76px)!important;height:auto!important;
+  transform:translate3d(-90px,-50%,0)!important;opacity:0;pointer-events:none;
+  transition:transform .52s cubic-bezier(.22,1,.36,1),opacity .28s ease
 }
-.mobile-radial-submenu-label{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  margin:0 4px 11px;color:var(--color-ink);font-family:var(--font-mono);
-  font-size:.58rem;letter-spacing:.12em;text-transform:uppercase
+.mobile-radial-submenu-panel[role="dialog"]{display:block}
+.mobile-radial-wrap.is-open + .mobile-radial-submenu-panel,
+.mobile-radial-submenu-panel{
+  /* Portal is outside the radial wrapper; visibility is controlled by the element's own state. */
 }
-.mobile-radial-submenu-label span:last-child{color:rgb(28 33 70/.4);font-size:.48rem}
-.mobile-radial-submenu-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
-  gap:10px;width:100%;max-height:32vh;overflow:auto;padding:1px;
-  overscroll-behavior:contain
+.mobile-radial-submenu-rail{
+  display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2.5vh,18px);
+  width:100%;max-height:78vh;overflow:visible
 }
-.mobile-radial-sub-bubble{
-  min-width:0;min-height:58px;display:flex;align-items:center;justify-content:center;
-  padding:9px 8px;border:1px solid rgb(28 33 70/.14);border-radius:15px;
-  background:var(--color-paper);color:var(--color-ink);box-shadow:2px 3px 0 rgb(28 33 70/.08);
-  font-size:clamp(.58rem,2.4vw,.72rem);font-weight:700;line-height:1.15;text-align:center;
-  transition:transform .2s ease,background .2s ease,box-shadow .2s ease
+.mobile-radial-submenu-panel .mobile-radial-sub-bubble{
+  position:relative;inset:auto!important;width:clamp(60px,17vw,68px);height:clamp(60px,17vw,68px);
+  min-height:0;display:flex;align-items:center;justify-content:center;padding:7px;
+  border:1px solid rgb(28 33 70/.16);border-radius:50%;background:rgb(251 246 234/.98);
+  color:var(--color-ink);box-shadow:3px 4px 0 rgb(28 33 70/.13);
+  font-size:clamp(.48rem,2vw,.60rem);font-weight:700;line-height:1.08;text-align:center;
+  white-space:normal;opacity:1;transform:translateX(-30px) scale(.55);
+  transition:transform .5s cubic-bezier(.22,1,.36,1),background .2s ease,box-shadow .2s ease;
+  transition-delay:var(--sub-delay)
 }
-.mobile-radial-sub-bubble:hover,.mobile-radial-sub-bubble:focus-visible{
-  background:var(--color-saffron);color:var(--color-ink);outline:none;transform:translateY(-2px);
-  box-shadow:3px 4px 0 var(--color-ink)
+.mobile-radial-submenu-panel .mobile-radial-sub-bubble span{max-width:54px}
+.mobile-radial-submenu-panel .mobile-radial-sub-bubble:hover,
+.mobile-radial-submenu-panel .mobile-radial-sub-bubble:focus-visible{
+  background:var(--color-saffron);color:var(--color-ink);outline:none;transform:translateX(3px) scale(1.04);
+  box-shadow:4px 5px 0 var(--color-ink)
 }
-
+.mobile-radial-submenu-panel.is-visible,
+.mobile-radial-submenu-panel{animation:ucoSubRailIn .52s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes ucoSubRailIn{
+  from{opacity:0;transform:translate3d(-90px,-50%,0)}
+  to{opacity:1;transform:translate3d(0,-50%,0)}
+}
 @media(max-width:380px){
   .mobile-radial-orbit{right:.9rem}
   .mobile-radial-item{width:56px;height:56px}
@@ -685,9 +682,9 @@
   .mobile-radial-child-toggle{width:24px;height:24px}
   .mobile-radial-child-toggle.is-outer-left{left:-33px}
   .mobile-radial-child-toggle.is-outer-right{right:-33px}
-  .mobile-radial-submenu-panel{left:8px!important;right:8px!important}
-  .mobile-radial-submenu-grid{grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:7px}
+  .mobile-radial-submenu-panel{left:8px!important;width:62px!important}
+  .mobile-radial-submenu-panel .mobile-radial-sub-bubble{width:56px;height:56px;font-size:.47rem}
 }
 @media(prefers-reduced-motion:reduce){
-  .mobile-radial-item,.mobile-radial-ring,.mobile-menu-button{transition-duration:0ms!important}
+  .mobile-radial-item,.mobile-radial-ring,.mobile-menu-button,.mobile-radial-submenu-panel,.mobile-radial-sub-bubble{transition-duration:0ms!important;animation:none!important}
 }
