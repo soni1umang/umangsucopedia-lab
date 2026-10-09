@@ -688,3 +688,9 @@
 @media(prefers-reduced-motion:reduce){
   .mobile-radial-item,.mobile-radial-ring,.mobile-menu-button,.mobile-radial-submenu-panel,.mobile-radial-sub-bubble{transition-duration:0ms!important;animation:none!important}
 }
+
+
+/* Ensure component CSS cannot override the mobile-only visibility utility. */
+@media (min-width: 1024px) {
+  .mobile-menu-button { display: none !important; }
+}
