@@ -220,7 +220,7 @@ function MobileRadialMenu({
             return (
               <div
                 key={item.to}
-                className="mobile-radial-item"
+                className={cn('mobile-radial-item', hasChildren && 'has-submenu')}
                 style={{
                   left: `${x}px`,
                   top: `${y}px`,
