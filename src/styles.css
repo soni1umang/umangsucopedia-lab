@@ -731,3 +731,18 @@
     height: 23px;
   }
 }
+
+
+/* Final arrow placement from the visual markup: move each trigger farther
+   down-left into the open diagonal lane, not immediately beside the parent circle. */
+.mobile-radial-item.has-submenu .mobile-radial-child-toggle {
+  left: -105px !important;
+  right: auto !important;
+  top: calc(100% + 68px) !important;
+}
+@media (max-width: 380px) {
+  .mobile-radial-item.has-submenu .mobile-radial-child-toggle {
+    left: -91px !important;
+    top: calc(100% + 58px) !important;
+  }
+}
