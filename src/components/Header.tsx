@@ -150,10 +150,7 @@ function MobileRadialMenu({
   }, [])
 
   useEffect(() => {
-    if (!open) {
-      // Closing the radial menu must immediately remove its submenu and arrow state.
-      setActiveChildren(null)
-    }
+    if (!open) setActiveChildren(null)
   }, [open])
 
   const handleNavigate = () => {
