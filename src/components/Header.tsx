@@ -239,10 +239,7 @@ function MobileRadialMenu({
                 {hasChildren && (
                   <button
                     type="button"
-                    className={cn(
-                      'mobile-radial-child-toggle',
-                      index < 4 ? 'is-outer-left' : 'is-outer-right',
-                    )}
+                    className="mobile-radial-child-toggle"
                     aria-label={`${activeChildren?.to === item.to ? 'Hide' : 'Show'} ${item.label} sub-menu`}
                     aria-expanded={activeChildren?.to === item.to}
                     onClick={(event) => {
