@@ -707,3 +707,27 @@
 }
 .mobile-radial-item.has-submenu .mobile-radial-child-toggle.is-outer-left { left: -34px; }
 .mobile-radial-item.has-submenu .mobile-radial-child-toggle.is-outer-right { right: -34px; }
+
+
+/* Put each submenu trigger in the diagonal gap below-left of its parent bubble.
+   This avoids the main circle and keeps the trigger away from the next bubble. */
+.mobile-radial-item.has-submenu { z-index: 40 !important; }
+.mobile-radial-item.has-submenu .mobile-radial-child-toggle {
+  left: -47px !important;
+  right: auto !important;
+  top: calc(100% + 20px) !important;
+  width: 25px;
+  height: 25px;
+  z-index: 80 !important;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%);
+}
+@media (max-width: 380px) {
+  .mobile-radial-item.has-submenu .mobile-radial-child-toggle {
+    left: -42px !important;
+    top: calc(100% + 18px) !important;
+    width: 23px;
+    height: 23px;
+  }
+}
