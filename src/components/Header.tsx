@@ -338,7 +338,7 @@ export function Header({ nav }: { nav: NavItem[] }) {
           )}
           <button
             type="button"
-            className={cn('mobile-menu-button lg:hidden', mobileOpen && 'is-open')}
+            className={cn('mobile-menu-button hidden lg:hidden', mobileOpen && 'is-open')}
             onClick={() => setMobileOpen((value) => !value)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
