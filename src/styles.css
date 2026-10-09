@@ -632,6 +632,13 @@
   transition:opacity .2s ease,background .2s ease,transform .2s ease
 }
 .mobile-radial-wrap.is-open .mobile-radial-child-toggle{opacity:1}
+.mobile-radial-wrap:not(.is-open) .mobile-radial-child-toggle,
+.mobile-radial-wrap.is-closed .mobile-radial-child-toggle {
+  display:none !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
 .mobile-radial-child-toggle.is-outer-left{left:-37px}
 .mobile-radial-child-toggle.is-outer-right{right:-37px}
 .mobile-radial-child-toggle:hover{background:var(--color-saffron)}
@@ -743,3 +750,12 @@
   }
 }
 
+
+
+/* Closed radial menus must never leave dropdown controls visible, regardless of later overrides. */
+.mobile-radial-wrap:not(.is-open) .mobile-radial-child-toggle {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
