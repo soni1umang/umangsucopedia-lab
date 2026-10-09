@@ -694,3 +694,16 @@
 @media (min-width: 1024px) {
   .mobile-menu-button { display: none !important; }
 }
+
+
+/* Keep submenu arrows above neighbouring radial bubbles. Each transformed bubble
+   creates its own stacking context, so raise the parent item as well as the arrow. */
+.mobile-radial-item.has-submenu { z-index: 30 !important; }
+.mobile-radial-item.has-submenu .mobile-radial-child-toggle {
+  z-index: 50 !important;
+  opacity: 1;
+  visibility: visible;
+  box-shadow: 2px 3px 0 rgb(28 33 70 / .18);
+}
+.mobile-radial-item.has-submenu .mobile-radial-child-toggle.is-outer-left { left: -34px; }
+.mobile-radial-item.has-submenu .mobile-radial-child-toggle.is-outer-right { right: -34px; }
