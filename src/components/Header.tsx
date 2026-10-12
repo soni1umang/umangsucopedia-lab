@@ -292,17 +292,17 @@ function PocketJournal() {
   useEffect(()=>{if(open&&!selected&&entries.length)setSelected(entries[entries.length-1].entry_date)},[open,entries,selected])
   const changeMonth=(n:number)=>{const [y,m]=month.split('-').map(Number);setMonth(new Date(y,m-1+n,1).toLocaleDateString('en-CA').slice(0,7))}
   return <>
-    <div className="pocket-journal-actions" aria-label="Personal journal shortcuts">
+    {typeof document!=='undefined'&&createPortal(<div className="pocket-journal-actions" aria-label="Personal journal shortcuts">
       <button type="button" className="pocket-journal-fab" onClick={()=>{setOpen(true);setCalendarOpen(false)}} aria-label="Open pocket journal" title="Pocket journal"><BookHeart className="size-5"/><span>Journal</span></button>
       <button type="button" className="pocket-calendar-fab" onClick={()=>{setOpen(true);setCalendarOpen(v=>!v)}} aria-label="Open journal calendar" title="Journal calendar"><CalendarDays className="size-5"/></button>
-    </div>
+    </div>,document.body)}
     {open&&typeof document!=='undefined'&&createPortal(
       <div className={"pocket-journal-overlay "+(closing?"is-closing":"is-opening")} role="dialog" aria-modal="true" aria-label="Pocket journal">
         <button className="pocket-journal-backdrop" onClick={closeJournal} aria-label="Close journal"/>
         <div className="pocket-journal-stage">
           <div className="pocket-journal-topbar"><span><BookHeart className="inline size-4 mr-2"/>A pocket of days</span><div><button onClick={()=>setCalendarOpen(v=>!v)} aria-label="Toggle calendar"><CalendarDays className="size-4"/></button><button onClick={closeJournal} aria-label="Close"><X className="size-5"/></button></div></div>
           <div className={"pocket-book "+(calendarOpen?"calendar-open ":"")+(closing?"is-closing":"is-opening")}>
-            <div className="pocket-book-cover"><div className="pocket-cover-label">little things<br/>worth remembering</div><div className="pocket-cover-mark">✳</div><span>FIELD NOTES · PRIVATE MOMENTS</span></div>
+            <div className="pocket-book-cover"><div className="pocket-cover-label">little things<br/>worth remembering</div><div className="pocket-cover-wordmark"><span>Umang’s</span><strong>Ucopedia<span>.</span></strong></div><span>FIELD NOTES · PRIVATE MOMENTS</span></div>
             <div className="pocket-book-pages"><div className="pocket-spiral" aria-hidden="true">{Array.from({length:15},(_,i)=><span key={i}/>)}</div>
               <div className="pocket-page" key={active?.entry_date||"empty"}>
                 {loading?<p className="pocket-empty">Turning to a page…</p>:!active?<div className="pocket-empty"><BookHeart className="mx-auto size-8 mb-3 opacity-50"/><p>No shared pages yet.</p><span>Choose a day in your dashboard and publish a page to see it here.</span></div>:<>
