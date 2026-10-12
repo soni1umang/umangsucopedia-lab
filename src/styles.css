@@ -864,3 +864,50 @@
 @keyframes pocketPageSettle{0%{opacity:.25;transform:rotateY(-72deg);filter:brightness(.82)}65%{opacity:1;transform:rotateY(8deg);filter:brightness(1.04)}100%{opacity:1;transform:rotateY(0);filter:brightness(1)}}
 @media(max-width:560px){.pocket-book-pages{margin-left:9px}.pocket-spiral{left:-15px;width:21px}.pocket-spiral span{width:19px;height:11px;border-width:2.5px}.pocket-page-turn{right:.45rem;bottom:.5rem;gap:.35rem}.pocket-page-turn button{width:2.35rem;height:2.35rem}}
 @media(prefers-reduced-motion:reduce){.pocket-journal-overlay.is-opening .pocket-journal-stage,.pocket-journal-overlay.is-closing .pocket-journal-stage,.pocket-book.is-opening .pocket-book-cover,.pocket-book.is-closing .pocket-book-cover{animation:none!important}}
+
+
+/* Keep the journal controls on the opposite side from the existing right-side widget. */
+.pocket-journal-actions{left:1.15rem;right:auto}
+@media(max-width:560px){
+  .pocket-journal-actions{left:.75rem;right:auto;bottom:.8rem}
+  /* Portrait notebook: same cover and ruled paper, stacked vertically for phone screens. */
+  .pocket-journal-overlay{padding:.65rem}
+  .pocket-journal-stage{width:min(440px,94vw);max-height:94dvh}
+  .pocket-journal-topbar{width:94%;margin-bottom:.55rem;font-size:.58rem}
+  .pocket-book{width:min(410px,90vw);height:min(76dvh,760px);height:min(76vh,760px);min-height:430px;max-height:760px;flex-direction:column;perspective:1500px}
+  .pocket-book-cover{flex:0 0 27%;min-height:125px;max-height:205px;border-radius:12px 12px 2px 2px;padding:1rem 1.15rem;transform-origin:center bottom;transform:rotateX(3deg);box-shadow:inset 0 -9px 14px rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.12)}
+  .pocket-cover-label{margin-top:.1rem;font-size:clamp(1.3rem,5vw,1.8rem);line-height:1.02;max-width:90%}
+  .pocket-cover-mark{position:absolute;right:1.15rem;top:50%;transform:translateY(-50%);width:clamp(3.3rem,13vw,5rem);font-size:clamp(2rem,8vw,3rem)}
+  .pocket-book-cover>span{font-size:.42rem;letter-spacing:.08em}
+  .pocket-book-pages{flex:1 1 auto;min-height:0;margin:11px 0 0;overflow:visible}
+  .pocket-book-pages:before{inset:0 -4px -5px;border-radius:0 0 9px 9px;background:repeating-linear-gradient(to right,#fffdf5 0,#fffdf5 3px,#e5dfd0 4px,#fffdf5 5px)}
+  .pocket-spiral{left:10px;right:10px;top:-18px;bottom:auto;width:auto;height:25px;flex-direction:row;justify-content:space-around}
+  .pocket-spiral span{width:13px;height:24px;border-width:3px;transform:rotate(2deg)}
+  .pocket-spiral span:after{left:2px;right:auto;top:1px;bottom:1px;width:3px;height:auto}
+  .pocket-page{border-left:1px solid rgba(91,87,72,.2);border-radius:0 0 9px 9px;padding:.8rem .9rem 3.4rem;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 25px,rgba(86,128,177,.13) 25px,rgba(86,128,177,.13) 26px)}
+  .pocket-page:before{left:0;top:0;bottom:0;width:7px}
+  .pocket-page-meta{flex-direction:row;gap:.4rem;font-size:.42rem;letter-spacing:.03em}
+  .pocket-page h2{font-size:clamp(1.1rem,4.7vw,1.45rem);margin:.6rem 0 .35rem}
+  .pocket-page-body{font-size:clamp(.75rem,3.2vw,.9rem);line-height:26px;max-height:35%;overflow:auto}
+  .pocket-page-photos{max-height:30%;margin-top:.5rem;gap:.5rem}
+  .pocket-page-photos figure{max-width:72%;padding:.25rem .25rem .55rem}
+  .pocket-page-photos img{height:clamp(65px,13vh,105px);object-fit:contain}
+  .pocket-page-turn{right:.55rem;bottom:.45rem;gap:.45rem}
+  .pocket-page-turn button{width:2.6rem;height:2.6rem}
+  .pocket-page-number{right:6.3rem;bottom:1.35rem}
+  .pocket-journal-hint{margin-top:.6rem;max-width:88vw;font-size:.61rem}
+  .pocket-mini-calendar{right:.65rem;top:4.4rem;max-height:75dvh;overflow:auto}
+}
+@media(max-width:380px){
+  .pocket-book{width:92vw;height:74vh;min-height:400px}
+  .pocket-book-cover{flex-basis:25%;min-height:112px;padding:.75rem .9rem}
+  .pocket-cover-label{font-size:1.2rem}
+  .pocket-cover-mark{right:.8rem;width:3rem}
+  .pocket-page{padding:.65rem .7rem 3.3rem}
+  .pocket-page-body{font-size:.72rem;line-height:24px}
+  .pocket-page-photos img{height:60px}
+  .pocket-page-turn button{width:2.35rem;height:2.35rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .pocket-book-cover{transform:none}
+}
