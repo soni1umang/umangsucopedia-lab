@@ -783,3 +783,56 @@
 .journal-date-has-entry:hover{background:rgba(185,80,46,.18)}
 @media(max-width:640px){.journal-paper{padding:1.1rem!important}.journal-paper-head,.journal-title-input,.journal-handwriting{padding-left:1.75rem}.journal-paper{background-image:linear-gradient(90deg,transparent 0,transparent 1.45rem,rgba(190,80,70,.16) 1.45rem,rgba(190,80,70,.16) calc(1.45rem + 1px),transparent calc(1.45rem + 1px)),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(82,125,172,.18) 31px,rgba(82,125,172,.18) 32px)}}
 @media(prefers-reduced-motion:reduce){.journal-photo,.journal-photo button{transition:none!important}}
+
+
+
+/* Floating pocket journal: a half-screen spiral notebook with a soft-focus backdrop */
+.pocket-journal-actions{position:fixed;right:1.15rem;bottom:1.25rem;z-index:65;display:flex;flex-direction:column;align-items:center;gap:.55rem}
+.pocket-journal-fab,.pocket-calendar-fab{display:flex;align-items:center;justify-content:center;gap:.5rem;border:1px solid rgba(28,33,70,.18);border-radius:999px;background:#fff9ea;color:var(--color-ink);box-shadow:3px 5px 0 rgba(28,33,70,.16),0 10px 30px rgba(28,33,70,.12);transition:transform .25s,background .25s}
+.pocket-journal-fab{padding:.85rem 1rem;font-size:.78rem;font-weight:700}.pocket-calendar-fab{width:2.8rem;height:2.8rem}
+.pocket-journal-fab:hover,.pocket-calendar-fab:hover{transform:translateY(-2px) rotate(-2deg);background:var(--color-saffron)}
+.pocket-journal-overlay{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:1rem;isolation:isolate}
+.pocket-journal-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:rgba(20,24,45,.28);backdrop-filter:blur(8px) saturate(.75);animation:pocketFadeIn .25s ease both}
+.pocket-journal-stage{position:relative;z-index:1;width:min(780px,94vw);max-height:92vh;display:flex;flex-direction:column;align-items:center;animation:pocketLiftIn .45s cubic-bezier(.2,.8,.2,1) both}
+.pocket-journal-topbar{width:min(680px,100%);display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;color:#fffaf0;font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.25)}
+.pocket-journal-topbar div{display:flex;gap:.5rem}.pocket-journal-topbar button{display:grid;place-items:center;width:2.4rem;height:2.4rem;border:1px solid rgba(255,255,255,.42);border-radius:50%;background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(8px)}
+.pocket-book{position:relative;display:flex;width:min(680px,100%);height:min(62vh,540px);min-height:370px;perspective:1800px;filter:drop-shadow(0 28px 25px rgba(16,20,40,.3));transform-style:preserve-3d;transition:transform .45s}
+.pocket-book-cover{position:relative;z-index:2;flex:0 0 48%;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(1rem,3vw,2rem);border:1px solid #252b50;border-radius:12px 2px 2px 12px;background:radial-gradient(circle at 20% 12%,rgba(255,255,255,.15),transparent 35%),linear-gradient(135deg,#33466d,#1c2146 72%);color:#f9edcf;box-shadow:inset -9px 0 14px rgba(0,0,0,.22),inset 3px 0 0 rgba(255,255,255,.12);transform-origin:right center;transform:rotateY(-3deg)}
+.pocket-cover-label{margin-top:1rem;font-family:'Fraunces',serif;font-size:clamp(1.55rem,4vw,2.5rem);font-style:italic;line-height:1.05;letter-spacing:-.03em}
+.pocket-cover-mark{align-self:center;display:grid;place-items:center;width:clamp(5rem,15vw,9rem);aspect-ratio:1;border:1px solid rgba(249,237,207,.52);border-radius:50%;font-size:clamp(3rem,8vw,5rem);color:#eab53a;box-shadow:0 0 0 9px rgba(249,237,207,.04),0 0 0 18px rgba(249,237,207,.025)}
+.pocket-book-cover>span{font:500 .48rem 'JetBrains Mono',monospace;letter-spacing:.12em;opacity:.65}
+.pocket-book-pages{position:relative;flex:1;min-width:0;overflow:visible;transform-style:preserve-3d}
+.pocket-book-pages:before{content:"";position:absolute;inset:5px -7px -4px 0;border-radius:0 9px 9px 0;background:repeating-linear-gradient(to bottom,#fffdf5 0,#fffdf5 3px,#e5dfd0 4px,#fffdf5 5px);box-shadow:4px 4px 0 rgba(0,0,0,.15)}
+.pocket-page{position:relative;z-index:1;height:100%;overflow:hidden;padding:clamp(.85rem,2.4vw,1.55rem);border:1px solid rgba(91,87,72,.2);border-left:0;border-radius:0 9px 9px 0;background-color:#fffdf5;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,rgba(86,128,177,.13) 27px,rgba(86,128,177,.13) 28px);box-shadow:inset 8px 0 12px rgba(40,38,30,.05);color:#252b45;transform-origin:left center;animation:pocketPageSettle .45s cubic-bezier(.2,.8,.2,1) both}
+.pocket-page:before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:linear-gradient(90deg,rgba(0,0,0,.10),rgba(255,255,255,.45));pointer-events:none}
+.pocket-page-meta{display:flex;justify-content:space-between;gap:.5rem;font:500 .47rem 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(37,43,69,.48)}
+.pocket-page h2{margin:.95rem 0 .55rem;font-family:'Fraunces',serif;font-size:clamp(1.1rem,2.7vw,1.65rem);font-weight:600;line-height:1.1}
+.pocket-page-body{max-height:48%;overflow:auto;font-family:'Comic Sans MS','Segoe Print','Bradley Hand',cursive;font-size:clamp(.74rem,1.7vw,.91rem);line-height:28px;color:#324b71;white-space:pre-wrap;overflow-wrap:anywhere}
+.pocket-page-body p{min-height:1.2em}
+.pocket-page-photos{display:flex;align-items:flex-start;gap:.75rem;margin-top:.65rem;max-height:34%}
+.pocket-page-photos figure{flex:1;max-width:65%;padding:.35rem .35rem .8rem;background:white;box-shadow:0 3px 8px rgba(0,0,0,.18);transform:rotate(-2deg);min-width:0}
+.pocket-page-photos figure.pocket-photo-alt{margin-top:.7rem;transform:rotate(2.3deg)}
+.pocket-page-photos img{width:100%;height:clamp(70px,13vh,130px);object-fit:cover}
+.pocket-page-number{position:absolute;right:1rem;bottom:.65rem;font:500 .54rem 'JetBrains Mono',monospace;color:rgba(37,43,69,.4)}
+.pocket-page-turn{position:absolute;right:.65rem;bottom:.55rem;display:flex;gap:.3rem}
+.pocket-page-turn button{display:grid;place-items:center;width:1.8rem;height:1.8rem;border:1px solid rgba(37,43,69,.16);border-radius:50%;background:rgba(255,253,245,.87);color:#252b45}
+.pocket-page-turn button:disabled{opacity:.22;cursor:not-allowed}
+.pocket-empty{display:grid;place-content:center;height:100%;text-align:center;font-family:'Fraunces',serif;font-size:1.25rem;color:rgba(37,43,69,.62)}
+.pocket-empty span{max-width:230px;margin:.8rem auto 0;font: .75rem/1.5 'Instrument Sans',sans-serif}
+.pocket-journal-hint{margin-top:1rem;text-align:center;color:rgba(255,255,255,.78);font-size:.72rem;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+.pocket-mini-calendar{position:absolute;right:max(1rem,calc((100vw - 730px)/2));top:5.8rem;width:min(285px,calc(100vw - 2rem));padding:1rem;border:1px solid rgba(28,33,70,.13);border-radius:1.1rem;background:#fffaf0;color:#252b45;box-shadow:0 16px 50px rgba(0,0,0,.22);animation:pocketLiftIn .25s ease both}
+.pocket-mini-calendar>div:first-child button{display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%}.pocket-mini-calendar>div:first-child button:hover{background:#eee5d2}
+.pocket-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.2rem;margin-top:.6rem;text-align:center}
+.pocket-calendar-grid>span{padding:.4rem 0;font:500 .6rem 'JetBrains Mono',monospace;color:rgba(37,43,69,.4)}
+.pocket-calendar-grid button,.pocket-calendar-grid i{display:grid;place-items:center;min-width:0;aspect-ratio:1;border-radius:50%;font-size:.7rem}
+.pocket-calendar-grid button:disabled{color:rgba(37,43,69,.22);cursor:default}
+.pocket-calendar-grid button.has-page{background:rgba(185,80,46,.12);color:#8f3f2d;font-weight:700}
+.pocket-calendar-grid button.current-page{outline:2px solid #eab53a;background:#1c2146;color:#fffaf0}
+.pocket-mini-calendar>p{margin-top:.8rem;border-top:1px solid rgba(37,43,69,.1);padding-top:.7rem;font-size:.7rem;color:rgba(37,43,69,.52)}
+@keyframes pocketFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pocketLiftIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes pocketPageSettle{from{opacity:.5;transform:rotateY(-8deg)}to{opacity:1;transform:rotateY(0)}}
+@media(max-width:560px){
+ .pocket-journal-actions{right:.75rem;bottom:.8rem}.pocket-journal-fab{padding:.75rem .85rem}.pocket-book{height:min(58vh,500px);min-height:340px}.pocket-book-cover{padding:.9rem .65rem}.pocket-book-cover>span{font-size:.39rem;letter-spacing:.04em}.pocket-cover-label{font-size:1.4rem}.pocket-page{padding:.75rem}.pocket-page-meta{font-size:.4rem;letter-spacing:.02em;flex-direction:column;gap:.2rem}.pocket-page h2{font-size:1.12rem}.pocket-page-body{font-size:.72rem;line-height:28px;max-height:46%}.pocket-page-photos{gap:.45rem}.pocket-page-photos img{height:70px}.pocket-journal-hint{max-width:90vw;font-size:.65rem}.pocket-mini-calendar{right:1rem;top:4.6rem}
+}
+@media(prefers-reduced-motion:reduce){.pocket-journal-backdrop,.pocket-journal-stage,.pocket-page{animation:none!important}.pocket-journal-fab,.pocket-calendar-fab{transition:none!important}}
