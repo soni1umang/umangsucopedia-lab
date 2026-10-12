@@ -43,7 +43,7 @@ function JournalStudio() {
   return {offset:(first.getDay()+6)%7,count}
  },[month])
  const saved=entries.find(e=>e.entry_date===date)
- const dirty=JSON.stringify({...draft,updated_at:undefined,id:undefined})!==JSON.stringify({...saved??emptyEntry(date),updated_at:undefined,id:undefined})
+ const dirty=JSON.stringify({...draft,updated_at:undefined,id:undefined})!==JSON.stringify({... (saved || emptyEntry(date)),updated_at:undefined,id:undefined})
  async function save(){
   if(!user)return
   setBusy(true);setError('');setNotice('')
