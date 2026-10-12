@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, BookHeart, CalendarDays, Check, ChevronLeft, ChevronRight, ImagePlus, LockKeyhole, Save, Trash2, Globe2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookHeart, CalendarDays, ChevronLeft, ChevronRight, ImagePlus, LockKeyhole, Save, Trash2, Globe2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 
 type JournalEntry = { id?: number; entry_date: string; title: string; body: string; photos: string[]; published: boolean; updated_at?: string }
-const today = () => new Date().toLocaleDateString('en-CA')
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
 const emptyEntry = (date:string):JournalEntry => ({ entry_date:date, title:'', body:'', photos:[], published:false })
 
 export const Route = createFileRoute('/admin/journal')({ component: JournalStudio })
@@ -69,7 +69,7 @@ function JournalStudio() {
   finally{setUploading(false)}
  }
  const formatDate=(d:string)=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'})
- const shiftDay=(n:number)=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);setDate(d.toLocaleDateString('en-CA'))}
+ const shiftDay=(n:number)=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);setDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`)}
  if(!ready||loading)return <section className="container-uco py-16">Opening the journal…</section>
  if(!user||!admin)return <section className="container-uco py-16"><h1 className="font-display text-4xl">Owner access required.</h1><Link to="/login" className="btn-ink mt-5">Login</Link></section>
  return <section className="container-uco py-10 md:py-14">
