@@ -759,3 +759,27 @@
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+
+/* Daily journal: lined stationery and staggered photo memories */
+.journal-paper{
+  position:relative;overflow:hidden;
+  background-color:#fffdf5;
+  background-image:linear-gradient(90deg,transparent 0,transparent 2rem,rgba(190,80,70,.16) 2rem,rgba(190,80,70,.16) calc(2rem + 1px),transparent calc(2rem + 1px)),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(82,125,172,.18) 31px,rgba(82,125,172,.18) 32px);
+  box-shadow:inset 0 0 0 1px rgba(28,33,70,.08),0 8px 22px rgba(28,33,70,.05);
+}
+.journal-paper-head{display:flex;justify-content:space-between;gap:1rem;padding-left:2.35rem;font:600 .58rem/1.4 'JetBrains Mono',monospace;letter-spacing:.17em;color:rgba(28,33,70,.4)}
+.journal-title-input{display:block;width:100%;margin:1.1rem 0 .45rem;padding:0 0 0 2.35rem;border:0;outline:0;background:transparent;color:var(--color-ink);font:italic 600 clamp(1.6rem,4vw,2.15rem)/1.35 'Fraunces',serif}
+.journal-title-input::placeholder{color:rgba(28,33,70,.3)}
+.journal-handwriting{display:block;width:100%;min-height:290px;resize:vertical;border:0;outline:0;background:transparent;padding:0 0 0 2.35rem;color:#29436a;font-family:'Comic Sans MS','Segoe Print','Bradley Hand',cursive;font-size:1rem;line-height:32px;white-space:pre-wrap}
+.journal-handwriting::placeholder{color:rgba(41,67,106,.45)}
+.journal-photo{position:relative;margin:0;padding:.45rem .45rem 1.1rem;background:#fff;box-shadow:0 5px 13px rgba(28,33,70,.18);transform:rotate(-2deg)}
+.journal-photo-tilt{transform:rotate(2.6deg);margin-top:.65rem}
+.journal-photo img{width:100%;height:140px;object-fit:cover}
+.journal-photo button{position:absolute;top:.55rem;right:.55rem;display:grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:999px;background:rgba(28,33,70,.8);color:white;opacity:0;transition:opacity .15s}
+.journal-photo:hover button,.journal-photo button:focus-visible{opacity:1}
+.journal-date-has-entry{background:rgba(185,80,46,.08);font-weight:700}
+.journal-date-has-entry:hover{background:rgba(185,80,46,.18)}
+@media(max-width:640px){.journal-paper{padding:1.1rem!important}.journal-paper-head,.journal-title-input,.journal-handwriting{padding-left:1.75rem}.journal-paper{background-image:linear-gradient(90deg,transparent 0,transparent 1.45rem,rgba(190,80,70,.16) 1.45rem,rgba(190,80,70,.16) calc(1.45rem + 1px),transparent calc(1.45rem + 1px)),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(82,125,172,.18) 31px,rgba(82,125,172,.18) 32px)}}
+@media(prefers-reduced-motion:reduce){.journal-photo,.journal-photo button{transition:none!important}}
