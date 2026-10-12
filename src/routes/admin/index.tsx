@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, FolderPlus, FlaskConical, LogOut, PenLine, Plus, Radio, Sparkles, Trash2, FileText, Settings2, Wrench, BookOpen } from 'lucide-react'
+import { Activity, FolderPlus, FlaskConical, LogOut, PenLine, Plus, Radio, Sparkles, Trash2, FileText, Settings2, Wrench, BookOpen, BookHeart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useIdentity } from '@/lib/identity-context'
 
@@ -90,7 +90,7 @@ function Admin() {
             <p className="mt-3 text-paper/60">{user.email} · instruments online</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to="/admin/content" className="btn-saffron !shadow-none"><Settings2 className="size-4" /> Content Studio</Link>
+            <Link to="/admin/journal" className="btn-ghost border-paper/20 text-paper hover:border-saffron hover:bg-paper/10"><BookHeart className="size-4" /> Daily journal</Link>\n            <Link to="/admin/content" className="btn-saffron !shadow-none"><Settings2 className="size-4" /> Content Studio</Link>
             <Link to="/admin/posts/new" className="btn-ghost border-paper/20 text-paper hover:border-saffron hover:bg-paper/10"><Plus className="size-4" /> New post</Link>
             <button className="btn-ghost border-paper/20 text-paper hover:border-saffron hover:bg-paper/10" onClick={() => void logout().then(() => location.href = import.meta.env.BASE_URL)}><LogOut className="size-4" /> Sign out</button>
           </div>
@@ -101,7 +101,7 @@ function Admin() {
           ['LIVE NOTEBOOK','Now','/now',Radio],
           ['RESEARCH','Publications','/academia/publications',BookOpen],
           ['WORKBENCH','Build log','/workbench',Wrench],
-          ['SITE EDITOR','Everything','/admin/content',FlaskConical],
+          ['DAILY JOURNAL','Pocket notebook','/admin/journal',BookHeart],\n          ['SITE EDITOR','Everything','/admin/content',FlaskConical],
         ].map(([eyebrow,label,to,Icon])=><Link key={String(to)} to={String(to)} className="group rounded-2xl border border-ink/10 bg-card p-5 transition hover:-translate-y-1 hover:border-ink hover:shadow-[6px_6px_0_var(--color-saffron)]"><Icon className="size-5 text-terracotta transition group-hover:rotate-[-8deg]"/><p className="mt-5 font-mono text-[.58rem] uppercase tracking-[.18em] text-ink/40">{String(eyebrow)}</p><p className="mt-1 font-display text-xl font-semibold">{String(label)}</p><Activity className="mt-4 size-3.5 text-leaf"/></Link>)}
       </div>
 
