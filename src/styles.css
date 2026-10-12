@@ -918,3 +918,20 @@
 }
 @keyframes pocketCoverOpenMobile{0%{transform:rotateX(72deg);filter:brightness(.7)}65%{transform:rotateX(-5deg);filter:brightness(1.04)}100%{transform:rotateX(3deg);filter:brightness(1)}}
 @keyframes pocketCoverCloseMobile{0%{transform:rotateX(3deg)}100%{transform:rotateX(68deg)}}
+
+/* Final journal polish: viewport-fixed shortcuts, legible handwriting and Ucopedia cover wordmark */
+.pocket-journal-actions{position:fixed!important;z-index:9990!important;left:1.15rem!important;right:auto!important;bottom:1.25rem!important}
+.pocket-page-body{font-size:clamp(.92rem,1.9vw,1.04rem);line-height:1.9;color:#324b71}
+.pocket-cover-wordmark{display:flex;flex-direction:column;gap:.05em;align-self:flex-start;margin-top:.6rem;font-family:'Fraunces',serif;line-height:.9;letter-spacing:-.055em}
+.pocket-cover-wordmark>span{font-size:clamp(1.7rem,4vw,2.55rem);font-weight:700;color:#fff2d2}
+.pocket-cover-wordmark strong{font-size:clamp(1.65rem,3.8vw,2.4rem);font-style:italic;font-weight:700;color:#d95f3d}
+.pocket-cover-wordmark strong span{color:#eab53a}
+.pocket-cover-mark{display:none}
+@media(max-width:560px){
+ .pocket-journal-actions{left:.75rem!important;right:auto!important;bottom:1rem!important}
+ .pocket-page-body{font-size:clamp(.95rem,3.7vw,1.08rem);line-height:1.85}
+ .pocket-cover-wordmark{margin-top:0;gap:.1em}
+ .pocket-cover-wordmark>span{font-size:clamp(1.55rem,6vw,2.1rem)}
+ .pocket-cover-wordmark strong{font-size:clamp(1.5rem,5.7vw,2rem)}
+ .pocket-book-cover{padding:1rem 1.15rem}
+}
