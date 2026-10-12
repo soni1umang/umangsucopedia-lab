@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-  ChevronDown,\n  BookHeart,\n  CalendarDays,
+  ChevronDown,
+  BookHeart,
+  CalendarDays,
   ChevronRight,
   CircleHelp,
   Gamepad2,
@@ -15,7 +17,8 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import { useSiteSettings } from '@/lib/site-context'\nimport { supabase } from '@/lib/supabase'
+import { useSiteSettings } from '@/lib/site-context'
+import { supabase } from '@/lib/supabase'
 
 import { SocialLinks } from './SocialIcons'
 import { useIdentity } from '@/lib/identity-context'
@@ -302,7 +305,8 @@ function PocketJournal() {
                 {loading?<p className="pocket-empty">Turning to a page…</p>:!active?<div className="pocket-empty"><BookHeart className="mx-auto size-8 mb-3 opacity-50"/><p>No shared pages yet.</p><span>Choose a day in your dashboard and publish a page to see it here.</span></div>:<>
                   <div className="pocket-page-meta"><span>FIELD NOTES</span><span>{dateLabel(active.entry_date)}</span></div>
                   <h2>{active.title||'An ordinary day'}</h2>
-                  <div className="pocket-page-body">{(active.body||'').split('\n').map((line:string,i:number)=><p key={i}>{line||' '}</p>)}</div>
+                  <div className="pocket-page-body">{(active.body||'').split('
+').map((line:string,i:number)=><p key={i}>{line||' '}</p>)}</div>
                   {Array.isArray(active.photos)&&active.photos.length>0&&<div className="pocket-page-photos">{active.photos.slice(0,2).map((src:string,i:number)=><figure key={src} className={i?'pocket-photo-alt':''}><img src={src} alt={'A memory from '+active.entry_date}/></figure>)}</div>}
                   <div className="pocket-page-number">{entries.findIndex(e=>e.entry_date===active.entry_date)+1} / {entries.length}</div>
                 </>}
@@ -399,7 +403,8 @@ export function Header({ nav }: { nav: NavItem[] }) {
         </div>
       </div>
 
-      <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />\n      <PocketJournal />
+      <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />
+      <PocketJournal />
     </header>
   )
 }
