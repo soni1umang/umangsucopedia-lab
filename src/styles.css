@@ -911,3 +911,10 @@
 @media(prefers-reduced-motion:reduce){
   .pocket-book-cover{transform:none}
 }
+
+@media(max-width:560px){
+ .pocket-book.is-opening .pocket-book-cover{animation:pocketCoverOpenMobile .72s cubic-bezier(.2,.75,.2,1) both}
+ .pocket-book.is-closing .pocket-book-cover{animation:pocketCoverCloseMobile .34s ease-in both}
+}
+@keyframes pocketCoverOpenMobile{0%{transform:rotateX(72deg);filter:brightness(.7)}65%{transform:rotateX(-5deg);filter:brightness(1.04)}100%{transform:rotateX(3deg);filter:brightness(1)}}
+@keyframes pocketCoverCloseMobile{0%{transform:rotateX(3deg)}100%{transform:rotateX(68deg)}}
