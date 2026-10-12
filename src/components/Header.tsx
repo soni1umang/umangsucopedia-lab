@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-  ChevronDown,
+  ChevronDown,\n  BookHeart,\n  CalendarDays,
   ChevronRight,
   CircleHelp,
   Gamepad2,
@@ -15,7 +15,7 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import { useSiteSettings } from '@/lib/site-context'
+import { useSiteSettings } from '@/lib/site-context'\nimport { supabase } from '@/lib/supabase'
 
 import { SocialLinks } from './SocialIcons'
 import { useIdentity } from '@/lib/identity-context'
@@ -260,6 +260,63 @@ function MobileRadialMenu({
   )
 }
 
+function PocketJournal() {
+  const [open,setOpen]=useState(false)
+  const [calendarOpen,setCalendarOpen]=useState(false)
+  const [loading,setLoading]=useState(false)
+  const [entries,setEntries]=useState<any[]>([])
+  const [selected,setSelected]=useState('')
+  const [month,setMonth]=useState(new Date().toLocaleDateString('en-CA').slice(0,7))
+  useEffect(()=>{
+    if(!open)return
+    let alive=true;setLoading(true)
+    supabase.from('journal_entries').select('entry_date,title,body,photos,published').eq('published',true).order('entry_date',{ascending:true}).then(({data,error})=>{
+      if(!alive)return
+      setEntries(error?[]:(data||[]));setLoading(false)
+    })
+    return()=>{alive=false}
+  },[open])
+  const visible=entries.filter(e=>e.entry_date.slice(0,7)===month)
+  const active=entries.find(e=>e.entry_date===selected)||entries[entries.length-1]
+  const dateLabel=(d:string)=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'long',year:'numeric'})
+  const calendar=useMemo(()=>{
+    const [y,m]=month.split('-').map(Number)
+    return {offset:(new Date(y,m-1,1).getDay()+6)%7,count:new Date(y,m,0).getDate()}
+  },[month])
+  useEffect(()=>{if(open&&!selected&&entries.length)setSelected(entries[entries.length-1].entry_date)},[open,entries,selected])
+  const changeMonth=(n:number)=>{const [y,m]=month.split('-').map(Number);setMonth(new Date(y,m-1+n,1).toLocaleDateString('en-CA').slice(0,7))}
+  return <>
+    <div className="pocket-journal-actions" aria-label="Personal journal shortcuts">
+      <button type="button" className="pocket-journal-fab" onClick={()=>{setOpen(true);setCalendarOpen(false)}} aria-label="Open pocket journal" title="Pocket journal"><BookHeart className="size-5"/><span>Journal</span></button>
+      <button type="button" className="pocket-calendar-fab" onClick={()=>{setOpen(true);setCalendarOpen(v=>!v)}} aria-label="Open journal calendar" title="Journal calendar"><CalendarDays className="size-5"/></button>
+    </div>
+    {open&&typeof document!=='undefined'&&createPortal(
+      <div className="pocket-journal-overlay" role="dialog" aria-modal="true" aria-label="Pocket journal">
+        <button className="pocket-journal-backdrop" onClick={()=>setOpen(false)} aria-label="Close journal"/>
+        <div className="pocket-journal-stage">
+          <div className="pocket-journal-topbar"><span><BookHeart className="inline size-4 mr-2"/>A pocket of days</span><div><button onClick={()=>setCalendarOpen(v=>!v)} aria-label="Toggle calendar"><CalendarDays className="size-4"/></button><button onClick={()=>setOpen(false)} aria-label="Close"><X className="size-5"/></button></div></div>
+          <div className={'pocket-book '+(calendarOpen?'calendar-open':'')}>
+            <div className="pocket-book-cover"><div className="pocket-cover-label">little things<br/>worth remembering</div><div className="pocket-cover-mark">✳</div><span>FIELD NOTES · PRIVATE MOMENTS</span></div>
+            <div className="pocket-book-pages">
+              <div className="pocket-page">
+                {loading?<p className="pocket-empty">Turning to a page…</p>:!active?<div className="pocket-empty"><BookHeart className="mx-auto size-8 mb-3 opacity-50"/><p>No shared pages yet.</p><span>Choose a day in your dashboard and publish a page to see it here.</span></div>:<>
+                  <div className="pocket-page-meta"><span>FIELD NOTES</span><span>{dateLabel(active.entry_date)}</span></div>
+                  <h2>{active.title||'An ordinary day'}</h2>
+                  <div className="pocket-page-body">{(active.body||'').split('\n').map((line:string,i:number)=><p key={i}>{line||' '}</p>)}</div>
+                  {Array.isArray(active.photos)&&active.photos.length>0&&<div className="pocket-page-photos">{active.photos.slice(0,2).map((src:string,i:number)=><figure key={src} className={i?'pocket-photo-alt':''}><img src={src} alt={'A memory from '+active.entry_date}/></figure>)}</div>}
+                  <div className="pocket-page-number">{entries.findIndex(e=>e.entry_date===active.entry_date)+1} / {entries.length}</div>
+                </>}
+                {active&&<div className="pocket-page-turn"><button onClick={()=>{const i=entries.findIndex(e=>e.entry_date===active.entry_date);if(i>0)setSelected(entries[i-1].entry_date)}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)<=0} aria-label="Turn to earlier page"><ChevronLeft className="size-5"/></button><button onClick={()=>{const i=entries.findIndex(e=>e.entry_date===active.entry_date);if(i<entries.length-1)setSelected(entries[i+1].entry_date)}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)>=entries.length-1} aria-label="Turn to later page"><ChevronRight className="size-5"/></button></div>}
+              </div>
+            </div>
+          </div>
+          {calendarOpen&&<aside className="pocket-mini-calendar"><div className="flex items-center justify-between"><button onClick={()=>changeMonth(-1)} aria-label="Previous month"><ChevronLeft className="size-4"/></button><strong>{new Date(month+'-15T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})}</strong><button onClick={()=>changeMonth(1)} aria-label="Next month"><ChevronRight className="size-4"/></button></div><div className="pocket-calendar-grid">{['M','T','W','T','F','S','S'].map((d,i)=><span key={d+i}>{d}</span>)}{Array.from({length:calendar.offset},(_,i)=><i key={'blank'+i}/>)}{Array.from({length:calendar.count},(_,i)=>{const day=String(i+1).padStart(2,'0'),key=month+'-'+day,exists=entries.some(e=>e.entry_date===key);return <button key={key} className={(exists?'has-page ':'')+(selected===key?'current-page':'')} disabled={!exists} onClick={()=>{setSelected(key);setCalendarOpen(false)}}>{i+1}</button>})}</div><p>{visible.length} {visible.length===1?'page':'pages'} this month</p></aside>}
+          <p className="pocket-journal-hint">Use the arrows to turn pages · choose the calendar to jump to a day</p>
+        </div>
+      </div>,document.body)}
+  </>
+}
+
 export function Header({ nav }: { nav: NavItem[] }) {
   const settings = useSiteSettings()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -342,7 +399,7 @@ export function Header({ nav }: { nav: NavItem[] }) {
         </div>
       </div>
 
-      <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />
+      <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />\n      <PocketJournal />
     </header>
   )
 }
