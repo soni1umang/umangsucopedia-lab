@@ -37,10 +37,17 @@ const paths: Record<SocialKey, React.ReactNode> = {
   ),
   orcid: (
     <>
-      <path d="M12 2.25a9.75 9.75 0 1 0 0 19.5 9.75 9.75 0 0 0 0-19.5Z" />
-      <path d="M9 8.25a2.1 2.1 0 1 1 4.2 0c0 1.25-2.1 1.85-2.1 3.5" />
-      <circle cx="11.1" cy="15.1" r=".55" fill="currentColor" stroke="none" />
-      <path d="M16.5 7.25v9.5" />
+      <circle cx="12" cy="12" r="10" fill="#A6CE39" stroke="none" />
+      <text
+        x="12"
+        y="16"
+        textAnchor="middle"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="10"
+        fontWeight="700"
+        fill="#FFFFFF"
+        stroke="none"
+      >iD</text>
     </>
   ),
   twitter: (
