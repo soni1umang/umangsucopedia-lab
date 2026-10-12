@@ -404,7 +404,7 @@ export function Header({ nav }: { nav: NavItem[] }) {
       </div>
 
       <MobileRadialMenu nav={nav} open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />
-      <PocketJournal />
+      {pathname.startsWith('/admin') ? null : <PocketJournal />}
     </header>
   )
 }
