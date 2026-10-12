@@ -25,6 +25,7 @@ export type SocialKey =
   | 'linkedin'
   | 'github'
   | 'twitter'
+  | 'orcid'
 
 /** Replace the placeholder URLs with your own profiles. */
 export const socials: { key: SocialKey; label: string; href: string }[] = [
