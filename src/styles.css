@@ -935,3 +935,23 @@
  .pocket-cover-wordmark strong{font-size:clamp(1.5rem,5.7vw,2rem)}
  .pocket-book-cover{padding:1rem 1.15rem}
 }
+
+/* Mobile journal corrections: true portrait page layout and no inner text scrolling. */
+@media(max-width:560px){
+  .pocket-book{
+    flex-direction:column!important;
+    width:min(410px,90vw)!important;
+    height:min(76dvh,760px)!important;
+    min-height:430px!important;
+    max-height:calc(100dvh - 150px)!important;
+  }
+  .pocket-book-cover{flex:0 0 27%!important;min-height:125px;max-height:205px}
+  .pocket-book-pages{flex:1 1 0!important;min-height:0!important;width:100%;margin:11px 0 0!important;overflow:visible!important}
+  .pocket-page{height:100%!important;overflow:hidden!important;padding:.8rem .9rem 3.5rem!important}
+  .pocket-page-body{max-height:none!important;height:auto!important;overflow:visible!important;font-size:clamp(.9rem,3.5vw,1.02rem)!important;line-height:1.65!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+  .pocket-page-body p{margin:0 0 .15em!important;min-height:0!important}
+  .pocket-page-photos{max-height:none!important;margin-top:.4rem!important}
+  .pocket-page-photos img{height:clamp(54px,9vh,82px)!important;object-fit:contain!important}
+  .pocket-page-number{bottom:.8rem!important}
+}
+@media(min-width:561px){.pocket-book{flex-direction:row}.pocket-book-cover{flex-basis:48%}}
