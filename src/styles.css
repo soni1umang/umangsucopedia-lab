@@ -1052,3 +1052,67 @@
   100%{opacity:1;transform:perspective(1400px) rotateX(0) rotateY(0) skewX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
 }
 @media(prefers-reduced-motion:reduce){.pocket-page-flip-next,.pocket-page-flip-previous{animation:none!important}}
+
+/* Kindle-inspired page-turn system: desktop landscape turns around the vertical edge;
+   mobile portrait turns around the top edge. The entering sheet curls and casts a moving shadow. */
+.pocket-book-pages{perspective:2200px!important;transform-style:preserve-3d!important}
+.pocket-page{
+  transform-style:preserve-3d!important;
+  backface-visibility:hidden!important;
+  will-change:transform,filter,box-shadow!important;
+  animation:none;
+}
+.pocket-page:after{
+  content:"";
+  position:absolute;
+  z-index:8;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(90deg,rgba(27,32,55,.36) 0%,rgba(27,32,55,.18) 8%,rgba(255,255,255,.45) 20%,rgba(255,255,255,0) 43%,rgba(27,32,55,.06) 100%);
+  transform:translateX(0);
+}
+@media(min-width:561px){
+ .pocket-page{transform-origin:left center!important}
+ .pocket-page-flip-next{animation:ebookLandscapeNext .92s cubic-bezier(.35,.02,.18,1) both!important}
+ .pocket-page-flip-previous{transform-origin:right center!important;animation:ebookLandscapePrevious .92s cubic-bezier(.35,.02,.18,1) both!important}
+ .pocket-page-flip-next:after{animation:ebookShadowNext .92s ease-out both}
+ .pocket-page-flip-previous:after{animation:ebookShadowPrevious .92s ease-out both}
+}
+@media(max-width:560px){
+ .pocket-book-pages{perspective:1800px!important}
+ .pocket-page{transform-origin:center top!important}
+ .pocket-page-flip-next{animation:ebookPortraitNext 1s cubic-bezier(.35,.02,.18,1) both!important}
+ .pocket-page-flip-previous{transform-origin:center bottom!important;animation:ebookPortraitPrevious 1s cubic-bezier(.35,.02,.18,1) both!important}
+ .pocket-page-flip-next:after{background:linear-gradient(180deg,rgba(27,32,55,.24) 0%,rgba(27,32,55,.08) 8%,rgba(255,255,255,.38) 22%,transparent 48%,rgba(27,32,55,.05) 100%);animation:ebookShadowPortraitNext 1s ease-out both}
+ .pocket-page-flip-previous:after{background:linear-gradient(0deg,rgba(27,32,55,.24) 0%,rgba(27,32,55,.08) 8%,rgba(255,255,255,.38) 22%,transparent 48%,rgba(27,32,55,.05) 100%);animation:ebookShadowPortraitPrevious 1s ease-out both}
+}
+@keyframes ebookLandscapeNext{
+  0%{opacity:.72;transform:rotateY(-78deg) translateX(-2%);filter:brightness(.78);box-shadow:inset 22px 0 28px rgba(25,31,55,.22)}
+  35%{opacity:1;transform:rotateY(-38deg) translateX(-1%);filter:brightness(.9);box-shadow:inset 14px 0 22px rgba(25,31,55,.16)}
+  72%{transform:rotateY(5deg);filter:brightness(1.02);box-shadow:inset -5px 0 12px rgba(25,31,55,.07)}
+  100%{opacity:1;transform:rotateY(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@keyframes ebookLandscapePrevious{
+  0%{opacity:.72;transform:rotateY(78deg) translateX(2%);filter:brightness(.78);box-shadow:inset -22px 0 28px rgba(25,31,55,.22)}
+  35%{opacity:1;transform:rotateY(38deg) translateX(1%);filter:brightness(.9);box-shadow:inset -14px 0 22px rgba(25,31,55,.16)}
+  72%{transform:rotateY(-5deg);filter:brightness(1.02);box-shadow:inset 5px 0 12px rgba(25,31,55,.07)}
+  100%{opacity:1;transform:rotateY(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@keyframes ebookPortraitNext{
+  0%{opacity:.72;transform:rotateX(-76deg) translateY(-1%);filter:brightness(.78);box-shadow:inset 0 22px 28px rgba(25,31,55,.22)}
+  34%{opacity:1;transform:rotateX(-39deg);filter:brightness(.9);box-shadow:inset 0 14px 22px rgba(25,31,55,.16)}
+  72%{transform:rotateX(5deg);filter:brightness(1.02);box-shadow:inset 0 -5px 12px rgba(25,31,55,.07)}
+  100%{opacity:1;transform:rotateX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@keyframes ebookPortraitPrevious{
+  0%{opacity:.72;transform:rotateX(76deg) translateY(1%);filter:brightness(.78);box-shadow:inset 0 -22px 28px rgba(25,31,55,.22)}
+  34%{opacity:1;transform:rotateX(39deg);filter:brightness(.9);box-shadow:inset 0 -14px 22px rgba(25,31,55,.16)}
+  72%{transform:rotateX(-5deg);filter:brightness(1.02);box-shadow:inset 0 5px 12px rgba(25,31,55,.07)}
+  100%{opacity:1;transform:rotateX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@keyframes ebookShadowNext{0%{opacity:.8;transform:translateX(-35%)}55%{opacity:.5;transform:translateX(0)}100%{opacity:0;transform:translateX(15%)}}
+@keyframes ebookShadowPrevious{0%{opacity:.8;transform:translateX(35%)}55%{opacity:.5;transform:translateX(0)}100%{opacity:0;transform:translateX(-15%)}}
+@keyframes ebookShadowPortraitNext{0%{opacity:.8;transform:translateY(-28%)}55%{opacity:.5;transform:translateY(0)}100%{opacity:0;transform:translateY(15%)}}
+@keyframes ebookShadowPortraitPrevious{0%{opacity:.8;transform:translateY(28%)}55%{opacity:.5;transform:translateY(0)}100%{opacity:0;transform:translateY(-15%)}}
+@media(prefers-reduced-motion:reduce){.pocket-page-flip-next,.pocket-page-flip-previous,.pocket-page-flip-next:after,.pocket-page-flip-previous:after{animation:none!important}}
