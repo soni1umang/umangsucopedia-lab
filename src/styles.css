@@ -955,3 +955,52 @@
   .pocket-page-number{bottom:.8rem!important}
 }
 @media(min-width:561px){.pocket-book{flex-direction:row}.pocket-book-cover{flex-basis:48%}}
+
+/* Natural memory photos: no Polaroid card, white mat or forced crop. */
+.pocket-page-photos{align-items:flex-start;gap:.85rem;max-height:none!important;overflow:visible}
+.pocket-page-photos figure,
+.pocket-page-photos figure.pocket-photo-alt{
+  flex:0 1 auto;
+  width:auto;
+  max-width:48%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
+.pocket-page-photos img{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:190px;
+  object-fit:contain;
+  background:transparent;
+}
+@media(max-width:560px){
+  /* A portrait spiral notebook turns pages upward from the bottom edge. */
+  .pocket-page{
+    transform-origin:center bottom!important;
+    animation:pocketVerticalPageFlip .72s cubic-bezier(.2,.72,.22,1) both!important;
+    backface-visibility:hidden;
+  }
+  .pocket-page-photos{gap:.7rem!important;align-items:flex-start}
+  .pocket-page-photos figure,
+  .pocket-page-photos figure.pocket-photo-alt{max-width:48%!important}
+  .pocket-page-photos img{
+    width:auto!important;
+    height:auto!important;
+    max-width:100%!important;
+    max-height:clamp(72px,14vh,125px)!important;
+    object-fit:contain!important;
+  }
+}
+@keyframes pocketVerticalPageFlip{
+  0%{opacity:.3;transform:rotateX(-88deg);filter:brightness(.8)}
+  45%{opacity:1;transform:rotateX(16deg);filter:brightness(1.04)}
+  72%{transform:rotateX(-7deg);filter:brightness(1)}
+  100%{opacity:1;transform:rotateX(0);filter:brightness(1)}
+}
+@media(prefers-reduced-motion:reduce){.pocket-page{animation:none!important}}
