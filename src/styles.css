@@ -1025,3 +1025,30 @@
   100%{opacity:1;transform:rotateX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
 }
 @media(prefers-reduced-motion:reduce){.pocket-page{animation:none!important;will-change:auto!important}}
+
+/* Soft, flexible paper curl. Previous and next entries flip in opposite directions. */
+@media(max-width:560px){
+  .pocket-page{
+    transform-origin:50% 0%!important;
+    transform-style:preserve-3d!important;
+    backface-visibility:hidden!important;
+    will-change:transform,filter,box-shadow!important;
+  }
+  .pocket-page-flip-next{animation:pocketSoftFlipNext 1.05s cubic-bezier(.42,0,.22,1) both!important}
+  .pocket-page-flip-previous{animation:pocketSoftFlipPrevious 1.05s cubic-bezier(.42,0,.22,1) both!important}
+}
+@keyframes pocketSoftFlipNext{
+  0%{opacity:.72;transform:perspective(1400px) rotateX(-72deg) rotateY(-3deg) skewX(-1.5deg);filter:brightness(.84);box-shadow:inset 0 18px 24px rgba(23,31,58,.2)}
+  20%{opacity:1;transform:perspective(1400px) rotateX(-49deg) rotateY(-2deg) skewX(-1deg);filter:brightness(.9);box-shadow:inset 0 14px 20px rgba(23,31,58,.16)}
+  52%{transform:perspective(1400px) rotateX(13deg) rotateY(1deg) skewX(.6deg);filter:brightness(1.035);box-shadow:inset 0 -8px 13px rgba(23,31,58,.08)}
+  76%{transform:perspective(1400px) rotateX(-5deg) rotateY(0) skewX(0);filter:brightness(1);box-shadow:inset 0 -2px 4px rgba(23,31,58,.025)}
+  100%{opacity:1;transform:perspective(1400px) rotateX(0) rotateY(0) skewX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@keyframes pocketSoftFlipPrevious{
+  0%{opacity:.72;transform:perspective(1400px) rotateX(72deg) rotateY(3deg) skewX(1.5deg);filter:brightness(.84);box-shadow:inset 0 -18px 24px rgba(23,31,58,.2)}
+  20%{opacity:1;transform:perspective(1400px) rotateX(49deg) rotateY(2deg) skewX(1deg);filter:brightness(.9);box-shadow:inset 0 -14px 20px rgba(23,31,58,.16)}
+  52%{transform:perspective(1400px) rotateX(-13deg) rotateY(-1deg) skewX(-.6deg);filter:brightness(1.035);box-shadow:inset 0 8px 13px rgba(23,31,58,.08)}
+  76%{transform:perspective(1400px) rotateX(5deg) rotateY(0) skewX(0);filter:brightness(1);box-shadow:inset 0 2px 4px rgba(23,31,58,.025)}
+  100%{opacity:1;transform:perspective(1400px) rotateX(0) rotateY(0) skewX(0);filter:brightness(1);box-shadow:inset 0 0 0 transparent}
+}
+@media(prefers-reduced-motion:reduce){.pocket-page-flip-next,.pocket-page-flip-previous{animation:none!important}}
