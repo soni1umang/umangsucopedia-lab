@@ -1116,3 +1116,8 @@
 @keyframes ebookShadowPortraitNext{0%{opacity:.8;transform:translateY(-28%)}55%{opacity:.5;transform:translateY(0)}100%{opacity:0;transform:translateY(15%)}}
 @keyframes ebookShadowPortraitPrevious{0%{opacity:.8;transform:translateY(28%)}55%{opacity:.5;transform:translateY(0)}100%{opacity:0;transform:translateY(-15%)}}
 @media(prefers-reduced-motion:reduce){.pocket-page-flip-next,.pocket-page-flip-previous,.pocket-page-flip-next:after,.pocket-page-flip-previous:after{animation:none!important}}
+
+/* Pocket journal galleries gracefully wrap when an entry contains many photos. */
+.pocket-page-photos{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.65rem!important}
+.pocket-page-photos figure,.pocket-page-photos figure.pocket-photo-alt{flex:0 1 calc(50% - .4rem);width:calc(50% - .4rem);max-width:calc(50% - .4rem)}
+.pocket-page-photos img{max-width:100%;max-height:clamp(75px,18vh,190px);object-fit:contain}
