@@ -36,7 +36,7 @@ function JournalStudio() {
   setEntries(list);const first=list.find(e=>e.entry_date===date);setSelectedEntryId(first?.id??null);setDraft(first||emptyEntry(date));setLoading(false)
  }
  useEffect(()=>{if(ready){if(user)void load();else setLoading(false)}},[ready,user])
- useEffect(()=>{const dayEntries=entries.filter(e=>e.entry_date===date);const chosen=dayEntries.find(e=>e.id===selectedEntryId)||dayEntries[0];setSelectedEntryId(chosen?.id??null);setDraft(chosen||emptyEntry(date))},[date,entries,selectedEntryId])
+ useEffect(()=>{const dayEntries=entries.filter(e=>e.entry_date===date);const chosen=dayEntries.find(e=>e.id===selectedEntryId)||dayEntries[0];setSelectedEntryId(chosen?.id??null);setDraft(chosen||emptyEntry(date))},[date,entries])
  const sorted=useMemo(()=>[...entries].sort((a,b)=>a.entry_date.localeCompare(b.entry_date)),[entries])
  const calendarDays=useMemo(()=>{
   const [y,m]=month.split('-').map(Number),first=new Date(y,m-1,1),count=new Date(y,m,0).getDate()
