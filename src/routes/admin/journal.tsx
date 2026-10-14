@@ -23,7 +23,7 @@ async function uploadJournalPhoto(file:File,userId:string) {
 function JournalStudio() {
  const {user,ready}=useIdentity()
  const [admin,setAdmin]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
- const [entries,setEntries]=useState<JournalEntry[]>([]),[date,setDate]=useState(today()),[draft,setDraft]=useState<JournalEntry>(emptyEntry(today())),[month,setMonth]=useState(today().slice(0,7)),[uploading,setUploading]=useState(false)
+ const [entries,setEntries]=useState<JournalEntry[]>([]),[date,setDate]=useState(today()),[draft,setDraft]=useState<JournalEntry>(emptyEntry(today())),[month,setMonth]=useState(today().slice(0,7)),[uploading,setUploading]=useState(false),[selectedEntryId,setSelectedEntryId]=useState<number|null>(null)
  async function load(){
   if(!user)return
   setLoading(true);setError('')
@@ -33,38 +33,38 @@ function JournalStudio() {
   const r=await supabase.from('journal_entries').select('*').order('entry_date',{ascending:false})
   if(r.error){setError('Journal table is not ready. Run supabase/migration_v4_journal.sql in the Supabase SQL Editor. '+r.error.message);setLoading(false);return}
   const list=(r.data||[]) as JournalEntry[]
-  setEntries(list);setDraft(list.find(e=>e.entry_date===date)||emptyEntry(date));setLoading(false)
+  setEntries(list);const first=list.find(e=>e.entry_date===date);setSelectedEntryId(first?.id??null);setDraft(first||emptyEntry(date));setLoading(false)
  }
  useEffect(()=>{if(ready){if(user)void load();else setLoading(false)}},[ready,user])
- useEffect(()=>{setDraft(entries.find(e=>e.entry_date===date)||emptyEntry(date))},[date,entries])
+ useEffect(()=>{const dayEntries=entries.filter(e=>e.entry_date===date);const chosen=dayEntries.find(e=>e.id===selectedEntryId)||dayEntries[0];setSelectedEntryId(chosen?.id??null);setDraft(chosen||emptyEntry(date))},[date,entries,selectedEntryId])
  const sorted=useMemo(()=>[...entries].sort((a,b)=>a.entry_date.localeCompare(b.entry_date)),[entries])
  const calendarDays=useMemo(()=>{
   const [y,m]=month.split('-').map(Number),first=new Date(y,m-1,1),count=new Date(y,m,0).getDate()
   return {offset:(first.getDay()+6)%7,count}
  },[month])
- const saved=entries.find(e=>e.entry_date===date)
+ const saved=entries.find(e=>e.id===selectedEntryId)||undefined
  const dirty=JSON.stringify({...draft,updated_at:undefined,id:undefined})!==JSON.stringify({... (saved || emptyEntry(date)),updated_at:undefined,id:undefined})
  async function save(){
   if(!user)return
   setBusy(true);setError('');setNotice('')
-  const row={entry_date:date,title:draft.title.trim(),body:draft.body,photos:draft.photos.slice(0,2),published:draft.published,updated_at:new Date().toISOString()}
+  const row={entry_date:date,title:draft.title.trim(),body:draft.body,photos:draft.photos,published:draft.published,updated_at:new Date().toISOString()}
   if(!row.title&&!row.body.trim()&&!row.photos.length){setError('Write a few lines or add a photo before saving.');setBusy(false);return}
-  const r=await supabase.from('journal_entries').upsert(row,{onConflict:'entry_date'}).select('*').single()
+  const r=saved?.id?await supabase.from('journal_entries').update(row).eq('id',saved.id).select('*').single():await supabase.from('journal_entries').insert(row).select('*').single()
   if(r.error){setError(r.error.message);setBusy(false);return}
-  setEntries(prev=>[...prev.filter(e=>e.entry_date!==date),r.data as JournalEntry].sort((a,b)=>b.entry_date.localeCompare(a.entry_date)))
+  setSelectedEntryId((r.data as JournalEntry).id??null);setEntries(prev=>[...prev.filter(e=>e.id!==(r.data as JournalEntry).id),r.data as JournalEntry].sort((a,b)=>b.entry_date.localeCompare(a.entry_date)))
   setNotice('The page is safely saved.');setBusy(false)
  }
  async function remove(){
-  if(!saved||!confirm('Delete this journal page permanently?'))return
-  const r=await supabase.from('journal_entries').delete().eq('entry_date',date)
+  if(!saved?.id||!confirm('Delete this journal entry permanently?'))return
+  const r=await supabase.from('journal_entries').delete().eq('id',saved.id)
   if(r.error){setError(r.error.message);return}
-  setEntries(prev=>prev.filter(e=>e.entry_date!==date));setDraft(emptyEntry(date));setNotice('Page deleted.')
+  setEntries(prev=>prev.filter(e=>e.id!==saved.id));setSelectedEntryId(null);setDraft(emptyEntry(date));setNotice('Entry deleted.')
  }
  async function addPhoto(file?:File){
   if(!file||!user)return
-  if(draft.photos.length>=2){setError('This notebook page supports up to two photos.');return}
+  
   setUploading(true);setError('')
-  try{const url=await uploadJournalPhoto(file,user.id);setDraft(v=>({...v,photos:[...v.photos,url].slice(0,2)}));setNotice('Photo uploaded — save the page to keep it in this entry.')}
+  try{const url=await uploadJournalPhoto(file,user.id);setDraft(v=>({...v,photos:[...v.photos,url]}));setNotice('Photo uploaded — save the page to keep it in this entry.')}
   catch(e){setError(e instanceof Error?e.message:'Photo upload failed.')}
   finally{setUploading(false)}
  }
@@ -80,11 +80,19 @@ function JournalStudio() {
    <div className="rounded-[1.6rem] border border-ink/15 bg-card p-4 shadow-[6px_7px_0_rgb(28_33_70/.08)] sm:p-6">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 pb-4"><div><p className="font-mono text-[.6rem] uppercase tracking-[.18em] text-terracotta">Selected page</p><h2 className="mt-1 font-display text-2xl font-semibold">{formatDate(date)}</h2></div><div className="flex gap-2"><button className="btn-ghost !px-3" onClick={()=>shiftDay(-1)} title="Previous day"><ChevronLeft className="size-4"/></button><button className="btn-ghost !px-3" onClick={()=>setDate(today())}>Today</button><button className="btn-ghost !px-3" onClick={()=>shiftDay(1)} title="Next day"><ChevronRight className="size-4"/></button></div></div>
     <div className="mt-5"><label className="label" htmlFor="journal-date">Journal date</label><input id="journal-date" className="field max-w-xs" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+     <label className="label mb-0" htmlFor="journal-entry-select">Entries for this date</label>
+     <select id="journal-entry-select" className="field max-w-sm" value={selectedEntryId??'new'} onChange={e=>{const id=e.target.value==='new'?null:Number(e.target.value);setSelectedEntryId(id);setDraft(id===null?emptyEntry(date):(entries.find(x=>x.id===id)||emptyEntry(date)))}}>
+      <option value="new">＋ New entry</option>
+      {entries.filter(e=>e.entry_date===date).map((e,i)=><option key={e.id} value={e.id}>{i+1}. {e.title||'Untitled entry'}{e.published?' · Published':' · Private'}</option>)}
+     </select>
+     <button type="button" className="btn-ghost !px-3" onClick={()=>{setSelectedEntryId(null);setDraft(emptyEntry(date));setNotice('New entry ready — save it when you’re done.')}}><ImagePlus className="size-4"/> New entry</button>
+    </div>
     <div className="journal-paper mt-5 rounded-xl px-5 py-5 sm:px-8 sm:py-7">
      <div className="journal-paper-head"><span>FIELD NOTES</span><span>{date}</span></div>
      <label className="sr-only" htmlFor="journal-title">Page heading</label><input id="journal-title" className="journal-title-input" placeholder="A title for today…" value={draft.title} onChange={e=>setDraft(v=>({...v,title:e.target.value}))}/>
      <label className="sr-only" htmlFor="journal-body">Daily journal entries</label><textarea id="journal-body" className="journal-handwriting" placeholder={'• One thing that happened today…\n• Something I learnt or noticed…\n○ Something to remember…'} value={draft.body} onChange={e=>setDraft(v=>({...v,body:e.target.value}))} rows={9}/>
-     <div className="mt-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-[.6rem] uppercase tracking-[.16em] text-ink/45">Little moments · up to 2 photos</span><label className="btn-ghost !px-3 cursor-pointer"><ImagePlus className="size-4"/>{uploading?'Uploading…':'Add photo'}<input type="file" accept="image/*" className="sr-only" disabled={uploading||draft.photos.length>=2} onChange={e=>{void addPhoto(e.target.files?.[0]);e.currentTarget.value=''}}/></label></div>
+     <div className="mt-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-[.6rem] uppercase tracking-[.16em] text-ink/45">Little moments · add as many photos as you like</span><label className="btn-ghost !px-3 cursor-pointer"><ImagePlus className="size-4"/>{uploading?'Uploading…':'Add photo'}<input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={e=>{void addPhoto(e.target.files?.[0]);e.currentTarget.value=''}}/></label></div>
       {draft.photos.length>0&&<div className="grid grid-cols-2 gap-4">{draft.photos.map((src,i)=><figure key={src} className={'journal-photo '+(i%2?'journal-photo-tilt':'')}><img src={src} alt={'Journal memory '+(i+1)}/><button type="button" aria-label="Remove photo" onClick={()=>setDraft(v=>({...v,photos:v.photos.filter(p=>p!==src)}))}><Trash2 className="size-3.5"/></button></figure>)}</div>}
      </div>
     </div>
