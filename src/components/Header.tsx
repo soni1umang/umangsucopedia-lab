@@ -277,20 +277,20 @@ function PocketJournal() {
   useEffect(()=>{
     if(!open)return
     let alive=true;setLoading(true)
-    supabase.from('journal_entries').select('entry_date,title,body,photos,published').eq('published',true).order('entry_date',{ascending:true}).then(({data,error})=>{
+    supabase.from('journal_entries').select('id,entry_date,title,body,photos,published').eq('published',true).order('entry_date',{ascending:true}).order('id',{ascending:true}).then(({data,error})=>{
       if(!alive)return
       setEntries(error?[]:(data||[]));setLoading(false)
     })
     return()=>{alive=false}
   },[open])
   const visible=entries.filter(e=>e.entry_date.slice(0,7)===month)
-  const active=entries.find(e=>e.entry_date===selected)||entries[entries.length-1]
+  const active=entries.find(e=>String(e.id)===selected)||entries[entries.length-1]
   const dateLabel=(d:string)=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'long',year:'numeric'})
   const calendar=useMemo(()=>{
     const [y,m]=month.split('-').map(Number)
     return {offset:(new Date(y,m-1,1).getDay()+6)%7,count:new Date(y,m,0).getDate()}
   },[month])
-  useEffect(()=>{if(open&&!selected&&entries.length)setSelected(entries[entries.length-1].entry_date)},[open,entries,selected])
+  useEffect(()=>{if(open&&!selected&&entries.length)setSelected(String(entries[entries.length-1].id))},[open,entries,selected])
   const changeMonth=(n:number)=>{const [y,m]=month.split('-').map(Number);setMonth(new Date(y,m-1+n,1).toLocaleDateString('en-CA').slice(0,7))}
   return <>
     {typeof document!=='undefined'&&createPortal(<div className="pocket-journal-actions" aria-label="Personal journal shortcuts">
@@ -305,19 +305,19 @@ function PocketJournal() {
           <div className={"pocket-book "+(calendarOpen?"calendar-open ":"")+(closing?"is-closing":"is-opening")}>
             <div className="pocket-book-cover"><div className="pocket-cover-label">little things<br/>worth remembering</div><div className="pocket-cover-wordmark"><span>Umang’s</span><strong>Ucopedia<span>.</span></strong></div><span>FIELD NOTES · PRIVATE MOMENTS</span></div>
             <div className="pocket-book-pages"><div className="pocket-spiral" aria-hidden="true">{Array.from({length:15},(_,i)=><span key={i}/>)}</div>
-              <div className={"pocket-page pocket-page-flip-"+flipDirection} key={active?.entry_date||"empty"}>
+              <div className={"pocket-page pocket-page-flip-"+flipDirection} key={active?.id||"empty"}>
                 {loading?<p className="pocket-empty">Turning to a page…</p>:!active?<div className="pocket-empty"><BookHeart className="mx-auto size-8 mb-3 opacity-50"/><p>No shared pages yet.</p><span>Choose a day in your dashboard and publish a page to see it here.</span></div>:<>
                   <div className="pocket-page-meta"><span>FIELD NOTES</span><span>{dateLabel(active.entry_date)}</span></div>
                   <h2>{active.title||'An ordinary day'}</h2>
                   <div className="pocket-page-body">{(active.body||'').split('\\n').map((line:string,i:number)=><p key={i}>{line||' '}</p>)}</div>
-                  {Array.isArray(active.photos)&&active.photos.length>0&&<div className="pocket-page-photos">{active.photos.slice(0,2).map((src:string,i:number)=><figure key={src} className={i?'pocket-photo-alt':''}><img src={src} alt={'A memory from '+active.entry_date}/></figure>)}</div>}
-                  <div className="pocket-page-number">{entries.findIndex(e=>e.entry_date===active.entry_date)+1} / {entries.length}</div>
+                  {Array.isArray(active.photos)&&active.photos.length>0&&<div className="pocket-page-photos">{active.photos.map((src:string,i:number)=><figure key={src} className={i?'pocket-photo-alt':''}><img src={src} alt={'A memory from '+active.entry_date}/></figure>)}</div>}
+                  <div className="pocket-page-number">{entries.findIndex(e=>e.id===active.id)+1} / {entries.length}</div>
                 </>}
-                {active&&<div className="pocket-page-turn"><button onClick={()=>{const i=entries.findIndex(e=>e.entry_date===active.entry_date);if(i>0){setFlipDirection('previous');setSelected(entries[i-1].entry_date)}}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)<=0} aria-label="Turn to earlier page"><ChevronLeft className="size-5"/></button><button onClick={()=>{const i=entries.findIndex(e=>e.entry_date===active.entry_date);if(i<entries.length-1){setFlipDirection('next');setSelected(entries[i+1].entry_date)}}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)>=entries.length-1} aria-label="Turn to later page"><ChevronRight className="size-5"/></button></div>}
+                {active&&<div className="pocket-page-turn"><button onClick={()=>{const i=entries.findIndex(e=>e.id===active.id);if(i>0){setFlipDirection('previous');setSelected(String(entries[i-1].id))}}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)<=0} aria-label="Turn to earlier page"><ChevronLeft className="size-5"/></button><button onClick={()=>{const i=entries.findIndex(e=>e.id===active.id);if(i<entries.length-1){setFlipDirection('next');setSelected(String(entries[i+1].id))}}} disabled={entries.findIndex(e=>e.entry_date===active.entry_date)>=entries.length-1} aria-label="Turn to later page"><ChevronRight className="size-5"/></button></div>}
               </div>
             </div>
           </div>
-          {calendarOpen&&<aside className="pocket-mini-calendar"><div className="flex items-center justify-between"><button onClick={()=>changeMonth(-1)} aria-label="Previous month"><ChevronLeft className="size-4"/></button><strong>{new Date(month+'-15T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})}</strong><button onClick={()=>changeMonth(1)} aria-label="Next month"><ChevronRight className="size-4"/></button></div><div className="pocket-calendar-grid">{['M','T','W','T','F','S','S'].map((d,i)=><span key={d+i}>{d}</span>)}{Array.from({length:calendar.offset},(_,i)=><i key={'blank'+i}/>)}{Array.from({length:calendar.count},(_,i)=>{const day=String(i+1).padStart(2,'0'),key=month+'-'+day,exists=entries.some(e=>e.entry_date===key);return <button key={key} className={(exists?'has-page ':'')+(selected===key?'current-page':'')} disabled={!exists} onClick={()=>{setFlipDirection(key<(active?.entry_date||'')?'previous':'next');setSelected(key);setCalendarOpen(false)}}>{i+1}</button>})}</div><p>{visible.length} {visible.length===1?'page':'pages'} this month</p></aside>}
+          {calendarOpen&&<aside className="pocket-mini-calendar"><div className="flex items-center justify-between"><button onClick={()=>changeMonth(-1)} aria-label="Previous month"><ChevronLeft className="size-4"/></button><strong>{new Date(month+'-15T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})}</strong><button onClick={()=>changeMonth(1)} aria-label="Next month"><ChevronRight className="size-4"/></button></div><div className="pocket-calendar-grid">{['M','T','W','T','F','S','S'].map((d,i)=><span key={d+i}>{d}</span>)}{Array.from({length:calendar.offset},(_,i)=><i key={'blank'+i}/>)}{Array.from({length:calendar.count},(_,i)=>{const day=String(i+1).padStart(2,'0'),key=month+'-'+day,exists=entries.some(e=>e.entry_date===key);return <button key={key} className={(exists?'has-page ':'')+(selected===key?'current-page':'')} disabled={!exists} onClick={()=>{const target=entries.find(e=>e.entry_date===key);if(target){setFlipDirection(key<(active?.entry_date||'')?'previous':'next');setSelected(String(target.id))}setCalendarOpen(false)}}>{i+1}</button>})}</div><p>{visible.length} {visible.length===1?'page':'pages'} this month</p></aside>}
           <p className="pocket-journal-hint">Use the arrows to turn pages · choose the calendar to jump to a day</p>
         </div>
       </div>,document.body)}
