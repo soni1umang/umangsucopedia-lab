@@ -1180,3 +1180,21 @@
   72% { transform:rotateY(5deg); filter:brightness(1.02); box-shadow:inset -5px 0 12px rgba(25,31,55,.07); }
   100% { opacity:1; transform:rotateY(0); filter:brightness(1); box-shadow:inset 0 0 0 transparent; }
 }
+
+
+/* Pocket journal: simple, quick horizontal slide between pages (no 3D curl). */
+@keyframes pocketSlideNext {
+  from { opacity:.35; transform:translateX(34px); }
+  to { opacity:1; transform:translateX(0); }
+}
+@keyframes pocketSlidePrevious {
+  from { opacity:.35; transform:translateX(-34px); }
+  to { opacity:1; transform:translateX(0); }
+}
+.pocket-page-flip-next { animation:pocketSlideNext .24s ease-out both !important; }
+.pocket-page-flip-previous { animation:pocketSlidePrevious .24s ease-out both !important; }
+.pocket-page-flip-next:after,
+.pocket-page-flip-previous:after { animation:none !important; opacity:0 !important; }
+@media(prefers-reduced-motion:reduce) {
+  .pocket-page-flip-next,.pocket-page-flip-previous { animation:none !important; }
+}
