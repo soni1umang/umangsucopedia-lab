@@ -1121,3 +1121,46 @@
 .pocket-page-photos{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.65rem!important}
 .pocket-page-photos figure,.pocket-page-photos figure.pocket-photo-alt{flex:0 1 calc(50% - .4rem);width:calc(50% - .4rem);max-width:calc(50% - .4rem)}
 .pocket-page-photos img{max-width:100%;max-height:clamp(75px,18vh,190px);object-fit:contain}
+
+
+/* Pocket journal v2: larger desktop book, lighter rendering, quicker tactile page turns. */
+@media (min-width: 561px) {
+  .pocket-journal-overlay { padding: 2vh 2vw; }
+  .pocket-journal-stage { width: min(96vw, 1500px); max-height: 96vh; }
+  .pocket-journal-topbar { width: min(90%, 1320px); margin-bottom: .75rem; }
+  .pocket-book {
+    width: min(88vw, 1360px);
+    height: min(76vh, 820px);
+    min-height: 430px;
+    filter: drop-shadow(0 18px 18px rgba(16,20,40,.22));
+    transition: none;
+  }
+  .pocket-book-cover { flex-basis: 50%; }
+  .pocket-book-pages { flex: 1 1 50%; }
+  .pocket-journal-hint { margin-top: .65rem; }
+}
+@media (max-width: 560px) {
+  .pocket-journal-backdrop { backdrop-filter: none; }
+  .pocket-journal-stage { animation-duration: .24s; }
+  .pocket-book { filter: drop-shadow(0 12px 12px rgba(16,20,40,.18)); }
+}
+/* Avoid expensive full-screen blur and heavy per-frame filter calculations on page turns. */
+.pocket-journal-backdrop { backdrop-filter: none !important; }
+.pocket-page {
+  will-change: auto !important;
+  filter: none;
+}
+.pocket-page-flip-next { animation: ebookLandscapeNext .62s cubic-bezier(.32,.05,.2,1) both !important; }
+.pocket-page-flip-previous { animation: ebookLandscapePrevious .62s cubic-bezier(.32,.05,.2,1) both !important; }
+.pocket-page-flip-next:after { animation: ebookShadowNext .62s ease-out both !important; }
+.pocket-page-flip-previous:after { animation: ebookShadowPrevious .62s ease-out both !important; }
+@media (max-width: 560px) {
+  .pocket-page-flip-next { animation: ebookPortraitNext .62s cubic-bezier(.32,.05,.2,1) both !important; }
+  .pocket-page-flip-previous { animation: ebookPortraitPrevious .62s cubic-bezier(.32,.05,.2,1) both !important; }
+  .pocket-page-flip-next:after { animation: ebookShadowPortraitNext .62s ease-out both !important; }
+  .pocket-page-flip-previous:after { animation: ebookShadowPortraitPrevious .62s ease-out both !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .pocket-page-flip-next,.pocket-page-flip-previous,
+  .pocket-page-flip-next:after,.pocket-page-flip-previous:after { animation:none !important; }
+}
