@@ -1164,3 +1164,19 @@
   .pocket-page-flip-next,.pocket-page-flip-previous,
   .pocket-page-flip-next:after,.pocket-page-flip-previous:after { animation:none !important; }
 }
+
+
+/* Correct desktop book-turn direction: next turns away from the right page toward the spine;
+   previous reverses that movement. Keep the existing sizing and speed. */
+@keyframes ebookLandscapeNext {
+  0% { opacity:.72; transform:rotateY(78deg) translateX(2%); filter:brightness(.78); box-shadow:inset -22px 0 28px rgba(25,31,55,.22); }
+  35% { opacity:1; transform:rotateY(38deg) translateX(1%); filter:brightness(.9); box-shadow:inset -14px 0 22px rgba(25,31,55,.16); }
+  72% { transform:rotateY(-5deg); filter:brightness(1.02); box-shadow:inset 5px 0 12px rgba(25,31,55,.07); }
+  100% { opacity:1; transform:rotateY(0); filter:brightness(1); box-shadow:inset 0 0 0 transparent; }
+}
+@keyframes ebookLandscapePrevious {
+  0% { opacity:.72; transform:rotateY(-78deg) translateX(-2%); filter:brightness(.78); box-shadow:inset 22px 0 28px rgba(25,31,55,.22); }
+  35% { opacity:1; transform:rotateY(-38deg) translateX(-1%); filter:brightness(.9); box-shadow:inset 14px 0 22px rgba(25,31,55,.16); }
+  72% { transform:rotateY(5deg); filter:brightness(1.02); box-shadow:inset -5px 0 12px rgba(25,31,55,.07); }
+  100% { opacity:1; transform:rotateY(0); filter:brightness(1); box-shadow:inset 0 0 0 transparent; }
+}
